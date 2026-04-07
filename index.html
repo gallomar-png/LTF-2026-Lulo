@@ -196,72 +196,11 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:13px}
   .contacts-layout.panel-open{grid-template-columns:1fr}
   #side-panel{position:static;max-height:none}
 }
-
 @media(max-width:700px){
-  /* Nav */
-  .topnav{padding:0 14px;gap:8px;height:48px}
-  .nav-logo{font-size:17px}
-  .stat-pill{display:none}
-  .nav-right{gap:6px}
-  .logout-btn{font-size:10px;padding:4px 8px}
-  #sync-status{display:none}
-
-  /* Main */
-  .main{padding:12px 14px}
-
-  /* Stats row — 3 cols on mobile */
-  .stats-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px}
-  .stat-card{padding:8px 10px}
-  .stat-n{font-size:18px}
-  .stat-l{font-size:9px}
-
-  /* Controls */
-  .controls{gap:6px;margin-bottom:10px}
-  .search-inp{width:100%;min-width:0}
-  .filter-sel{font-size:12px;padding:7px 8px;flex:1}
-  .ctrl-btn{font-size:11px;padding:6px 10px}
-
-  /* Hide desktop table completely — handled above */
-
-  /* Side panel becomes fullscreen drawer */
-  #side-panel{
-    display:none;
-    position:fixed;
-    inset:0;
-    z-index:500;
-    border-radius:0;
-    border:none;
-    overflow-y:auto;
-    max-height:100vh;
-    padding-bottom:30px;
-  }
-  #side-panel.mobile-open{display:block}
-  .contacts-layout.panel-open{grid-template-columns:1fr}
-  .sp-name{font-size:16px;padding-right:40px}
-  .sp-header{padding:14px 16px 10px}
-  .sp-body{padding:12px 16px}
-
-  /* Dashboard */
-  .dash-grid{grid-template-columns:1fr}
-  .benji-section{padding:14px}
+  .table-head,.t-row{grid-template-columns:28px 1fr 100px 80px}
+  .t-row .t-track,.t-row .t-status,.t-row .note-cell,.table-head div:nth-child(4),.table-head div:nth-child(5),.table-head div:nth-child(7){display:none}
+  .main{padding:14px 16px}
 }
-/* MOBILE CARDS */
-#mobile-list{display:none}
-@media(max-width:700px){
-  #mobile-list{display:block}
-  .table-wrap{display:none}
-}
-.m-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .1s;-webkit-tap-highlight-color:transparent}
-.m-card:active{background:var(--surface2)}
-.m-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
-.m-card-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.3}
-.m-card-co{font-size:12px;color:var(--text3);margin-top:1px}
-.m-card-chk{width:20px;height:20px;min-width:20px;accent-color:var(--accent);cursor:pointer;margin-top:2px}
-.m-card-badges{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
-.m-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.m-card-note{font-size:11px;color:var(--text3);font-style:italic;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.m-card-btn{font-size:12px;padding:5px 14px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--surface2);color:var(--text2);cursor:pointer;white-space:nowrap;font-weight:500}
-.m-benji-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:4px;vertical-align:middle}
 .fade-in{animation:fi .18s ease}
 @keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
 </style>
@@ -333,7 +272,6 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:13px}
             </div>
             <div id="list-body"></div>
           </div>
-          <div id="mobile-list"></div>
           <div id="detail"></div>
         </div>
         <div id="side-panel"></div>
@@ -1117,45 +1055,25 @@ function getLocalData(){
 async function loadState(){
   showSyncStatus('Cargando...','var(--orange)');
   let loaded=false;
-  // Try cloud first (only if window.storage exists)
-  if(window.storage){
-    try{
-      const result=await window.storage.get(CLOUD_KEY,true);
-      if(result&&result.value){
-        ST=JSON.parse(result.value);
-        loaded=true;
-        showSyncStatus('Sincronizado ✓','var(--accent)');
-      }
-    }catch(e){}
-  }
-  // Fall back to localStorage
+  try{
+    const result=await window.storage.get(CLOUD_KEY,true);
+    if(result&&result.value){ST=JSON.parse(result.value);loaded=true;showSyncStatus('Sincronizado ✓','var(--accent)');}
+  }catch(e){}
   if(!loaded){
     const local=getLocalData();
-    if(local){
-      ST=local;
-      showSyncStatus('Local','var(--text3)');
-      // Try to push to cloud silently
-      if(window.storage) save();
-    } else {
-      showSyncStatus('Listo','var(--accent)');
-    }
+    if(local){ST=local;showSyncStatus('Subiendo datos locales...','var(--orange)');await save();}
+    else showSyncStatus('Listo','var(--accent)');
   }
   ensureGuests();renderStats();renderList();
 }
-
 async function save(){
-  // Always save to localStorage first (works everywhere)
-  try{localStorage.setItem(SK_LOCAL,JSON.stringify(ST));}catch(e){}
-  // Then try cloud if available
-  if(window.storage){
-    try{
-      await window.storage.set(CLOUD_KEY,JSON.stringify(ST),true);
-      showSyncStatus('Guardado ✓','var(--accent)');
-    }catch(e){
-      showSyncStatus('Local','var(--text3)');
-    }
-  } else {
-    showSyncStatus('Local','var(--text3)');
+  try{
+    await window.storage.set(CLOUD_KEY,JSON.stringify(ST),true);
+    try{localStorage.setItem(SK_LOCAL,JSON.stringify(ST));}catch(e){}
+    showSyncStatus('Guardado ✓','var(--accent)');
+  }catch(e){
+    try{localStorage.setItem(SK_LOCAL,JSON.stringify(ST));}catch(e2){}
+    showSyncStatus('Solo local','var(--orange)');
   }
 }
 
@@ -1202,8 +1120,6 @@ function renderStats(){
 function toggleMarked(){onlyM=!onlyM;document.getElementById('btn-marked').classList.toggle('on',onlyM);renderList();}
 function toggleBenji(){onlyB=!onlyB;document.getElementById('btn-benji').classList.toggle('on',onlyB);renderList();}
 
-function isMobile(){return window.innerWidth<=700;}
-
 function renderList(){
   const q=document.getElementById('search').value.toLowerCase();
   const ft=document.getElementById('f-track').value;
@@ -1216,14 +1132,8 @@ function renderList(){
     return(!q||gn(g).toLowerCase().includes(q)||g.company.toLowerCase().includes(q)||g.title.toLowerCase().includes(q))
       &&(!ft||trks.includes(ft))&&(!fs||s.status===fs)&&(!onlyM||s.marked)&&(!onlyB||s.benji);
   });
-
-  // DESKTOP TABLE
   const body=document.getElementById('list-body');
-  if(!gs.length){
-    body.innerHTML='<div class="empty-state">Sin resultados</div>';
-    document.getElementById('mobile-list').innerHTML='<div class="empty-state">Sin resultados</div>';
-    return;
-  }
+  if(!gs.length){body.innerHTML='<div class="empty-state">Sin resultados</div>';return;}
   body.innerHTML=gs.map(g=>{
     const s=ST[g.id];
     const trks=s.tracks||[];
@@ -1243,32 +1153,6 @@ function renderList(){
       <div class="note-cell"><div class="note-cell-text">${s.note||''}</div></div>
     </div>`;
   }).join('');
-
-  // MOBILE CARDS
-  const mlist=document.getElementById('mobile-list');
-  mlist.innerHTML=gs.map(g=>{
-    const s=ST[g.id];
-    const trks=s.tracks||[];
-    const badgeHtml=trks.map(t=>{const tk=TRACKS[t]||TRACKS[''];return `<span class="badge ${tk.cls}">${tk.label}</span>`;}).join('');
-    return `<div class="m-card" onclick="openSP(${g.id})">
-      <div class="m-card-top">
-        <div>
-          <div class="m-card-name">${gn(g)}${s.benji?'<span class="m-benji-dot"></span>':''}</div>
-          <div class="m-card-co">${g.title} · ${g.company}</div>
-        </div>
-        <input type="checkbox" class="m-card-chk" ${s.marked?'checked':''} onclick="chkClick(event,${g.id})">
-      </div>
-      <div class="m-card-badges">
-        ${badgeHtml||''}
-        <span class="badge ${STATUS_COLORS[s.status]}">${STATUS_LABELS[s.status]}</span>
-      </div>
-      <div class="m-card-bottom">
-        <div class="m-card-note">${s.note||''}</div>
-        <button class="m-card-btn" onclick="event.stopPropagation();openSP(${g.id})">Ver →</button>
-      </div>
-    </div>`;
-  }).join('');
-
   renderStats();
 }
 function chkClick(e,id){e.stopPropagation();ST[id].marked=e.target.checked;if(!e.target.checked){ST[id].tracks=[];ST[id].benji=false;}save();renderStats();}
@@ -1281,7 +1165,6 @@ function openSP(id){
   document.getElementById('contacts-layout').classList.add('panel-open');
   const panel=document.getElementById('side-panel');
   panel.style.display='block';
-  if(isMobile()) panel.classList.add('mobile-open');
 
   // Build track checkboxes — max 2 selectable
   const trackCbs=Object.entries(TRACKS).filter(([k])=>k!=='').map(([k,v])=>{
@@ -1348,12 +1231,11 @@ function openSP(id){
       </div>
     </div>
     <div class="spsec" id="sp-notas">
-      <input type="text" class="note-inp" id="sp-nt-${id}" placeholder="Notas sobre ${fn}..." value="${(s.note||'').replace(/"/g,'&quot;')}" oninput="setF(${id},'note',this.value)">
+      <textarea class="note-inp" id="sp-nt-${id}" placeholder="Notas sobre ${fn}..." rows="4" style="resize:vertical;line-height:1.5" oninput="setF(${id},'note',this.value)">${(s.note||'').replace(/</g,'&lt;')}</textarea>
       <div class="note-hint">Se guarda automáticamente.</div>
     </div>
   </div>`;
   loadSPMsg(id,'informal',panel.querySelector('#smb-inf'));
-  if(isMobile()) window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function swSP(e,tab){
@@ -1362,12 +1244,9 @@ function swSP(e,tab){
   e.target.classList.add('on');document.getElementById('sp-'+tab).classList.add('on');
 }
 function closeSP(){
-  const panel=document.getElementById('side-panel');
-  panel.style.display='none';
-  panel.classList.remove('mobile-open');
+  document.getElementById('side-panel').style.display='none';
   document.getElementById('contacts-layout').classList.remove('panel-open');
   activeId=null;renderList();
-  if(isMobile()) window.scrollTo(0,0);
 }
 function toggleTrack(id, track, checked){
   const s=ST[id];
@@ -1391,9 +1270,24 @@ function toggleTrack(id, track, checked){
   // keep panel open on same contact
   setTimeout(()=>openSP(id),10);
 }
+let _saveTimer=null;
+function debouncedSave(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>save(),800);
+}
 function setF(id,f,v){
   ST[id][f]=v;
-  save();renderStats();renderList();
+  if(f==='note'){
+    // For notes: just save quietly, don't re-render (would lose cursor focus)
+    debouncedSave();
+    // Update note cell in list if visible without full re-render
+    const noteCell=document.querySelector(`.t-row[onclick*="openSP(${id})"] .note-cell-text`);
+    if(noteCell) noteCell.textContent=v;
+    // Update dashboard note if visible
+    renderStats();
+  } else {
+    save();renderStats();renderList();
+  }
 }
 function loadSPMsg(id,type,btn){
   const g=GUESTS.find(x=>x.id===id);if(!g)return;
