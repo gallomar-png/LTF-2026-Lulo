@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LTF2026 — Lulo Bank Strategy</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --surface: #ffffff;
+  --surface2: #f9f8f5;
+  --border: #e8e6e0;
+  --border2: #d4d0c8;
+  --text: #1a1917;
+  --text2: #6b6860;
+  --text3: #a8a49c;
+  --accent: #1a6b3a;
+  --accent-bg: #e8f4ec;
+  --accent-text: #14532d;
+  --blue: #1e4d8c;
+  --blue-bg: #e8eef8;
+  --blue-text: #1e3a6e;
+  --orange: #b45309;
+  --orange-bg: #fef3e2;
+  --orange-text: #92400e;
+  --red: #b91c1c;
+  --red-bg: #fee2e2;
+  --red-text: #991b1b;
+  --purple: #6d28d9;
+  --purple-bg: #ede9fe;
+  --purple-text: #5b21b6;
+  --teal: #0d7377;
+  --teal-bg: #e0f2f2;
+  --teal-text: #0f5b5e;
+  --gray-bg: #f1f0ec;
+  --gray-text: #6b6860;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+input,select,textarea,button{font-family:'Inter',sans-serif;font-size:13px}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:24px}
+.login-logo{font-family:'Playfair Display',serif;font-size:36px;color:var(--text);letter-spacing:-1px}
+.login-logo span{color:var(--accent)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px 36px;width:340px;display:flex;flex-direction:column;gap:14px;box-shadow:var(--shadow)}
+.login-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:-6px}
+.login-inp{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-size:14px;width:100%;outline:none;transition:border-color .15s}
+.login-inp:focus{border-color:var(--accent);background:#fff}
+.login-btn{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:12px;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.02em}
+.login-btn:hover{opacity:.88}
+.login-err{font-size:12px;color:var(--red);text-align:center;min-height:16px}
+.login-hint{font-size:11px;color:var(--text3);text-align:center}
+
+/* APP */
+#app{display:none}
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:16px;height:52px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--text);letter-spacing:-.5px;margin-right:4px;white-space:nowrap}
+.nav-logo span{color:var(--accent)}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{font-size:13px;padding:6px 14px;border-radius:6px;cursor:pointer;color:var(--text2);transition:all .12s;white-space:nowrap;border:none;background:transparent;font-family:'Inter',sans-serif;font-weight:500}
+.nav-tab:hover{color:var(--text);background:var(--surface2)}
+.nav-tab.on{color:var(--accent);background:var(--accent-bg)}
+.nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.stat-pill{font-size:11px;padding:4px 10px;border-radius:20px;background:var(--surface2);color:var(--text2);border:1px solid var(--border);white-space:nowrap}
+.stat-pill b{color:var(--accent);font-weight:600}
+.logout-btn{font-size:11px;padding:5px 12px;border-radius:6px;background:transparent;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .12s}
+.logout-btn:hover{background:var(--surface2);color:var(--text2)}
+
+.main{padding:20px 24px;max-width:1200px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.stat-n{font-size:24px;font-weight:600;color:var(--text);line-height:1}
+.stat-l{font-size:10px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.06em}
+.stat-card.hi .stat-n{color:var(--accent)}
+.stat-card.hi2 .stat-n{color:var(--purple)}
+.stat-card.hi3 .stat-n{color:var(--orange)}
+
+/* CONTROLS */
+.controls{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.search-inp{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;color:var(--text);flex:1;min-width:200px;outline:none;transition:border-color .15s}
+.search-inp:focus{border-color:var(--accent);background:#fff}
+.filter-sel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;color:var(--text2);outline:none;cursor:pointer;transition:border-color .15s}
+.filter-sel:focus{border-color:var(--accent)}
+.ctrl-btn{font-size:12px;padding:7px 13px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .12s;white-space:nowrap;font-weight:500}
+.ctrl-btn:hover{background:var(--surface2);color:var(--text)}
+.ctrl-btn.on{background:var(--accent-bg);color:var(--accent-text);border-color:#b6d9c4;font-weight:600}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.table-head{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.t-row{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;cursor:pointer}
+.t-row:last-child{border-bottom:none}
+.t-row:hover{background:var(--surface2)}
+.t-row-active{background:var(--accent-bg)!important;border-left:3px solid var(--accent)}
+.t-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-co{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chk{width:15px;height:15px;cursor:pointer;accent-color:var(--accent)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;white-space:nowrap}
+.b-green{background:var(--accent-bg);color:var(--accent-text)}
+.b-blue{background:var(--blue-bg);color:var(--blue-text)}
+.b-orange{background:var(--orange-bg);color:var(--orange-text)}
+.b-red{background:var(--red-bg);color:var(--red-text)}
+.b-purple{background:var(--purple-bg);color:var(--purple-text)}
+.b-teal{background:var(--teal-bg);color:var(--teal-text)}
+.b-gray{background:var(--gray-bg);color:var(--gray-text)}
+.b-amber{background:#fef9c3;color:#854d0e}
+.act-btn{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;transition:all .1s;font-weight:500}
+.act-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.note-cell{position:relative;overflow:hidden;cursor:default}
+.note-cell-text{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-cell:hover .note-cell-text{overflow:visible;white-space:normal;position:absolute;left:0;top:50%;transform:translateY(-50%);background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:6px 10px;z-index:50;width:220px;box-shadow:0 4px 12px rgba(0,0,0,0.1);color:var(--text2);font-size:12px;line-height:1.5}
+
+/* TOOLTIP */
+.name-cell{position:relative;overflow:visible}
+.tt{display:none;position:absolute;left:0;top:calc(100% + 6px);z-index:200;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 13px;width:280px;box-shadow:0 4px 16px rgba(0,0,0,0.12);pointer-events:none}
+.tt-industry{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-text);background:var(--accent-bg);padding:2px 7px;border-radius:10px;display:inline-block;margin-bottom:6px}
+.tt-desc{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:6px}
+.tt-products{font-size:11px;color:var(--text3);line-height:1.5}
+.tt-products b{color:var(--text2);font-weight:600}
+.name-cell:hover .tt{display:block}
+
+/* SPLIT LAYOUT */
+.contacts-layout{display:grid;grid-template-columns:1fr;gap:16px}
+.contacts-layout.panel-open{grid-template-columns:1fr 380px}
+
+/* SIDE PANEL */
+#side-panel{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden;align-self:start;position:sticky;top:68px;max-height:calc(100vh - 88px);overflow-y:auto}
+.sp-header{padding:16px 18px 0;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:10;padding-bottom:12px}
+.sp-close{float:right;font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;margin-top:2px}
+.sp-close:hover{background:var(--surface2)}
+.sp-name{font-family:'Playfair Display',serif;font-size:18px;color:var(--text);line-height:1.2;padding-right:60px}
+.sp-title{font-size:11px;color:var(--text2);margin-top:2px}
+.sp-body{padding:14px 18px}
+.sp-co-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px}
+.sp-co-industry{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-text);background:var(--accent-bg);padding:2px 7px;border-radius:10px;display:inline-block;margin-bottom:5px}
+.sp-co-desc{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:4px}
+.sp-co-products{font-size:11px;color:var(--text3);line-height:1.5}
+.sp-co-products b{color:var(--text2);font-weight:500}
+.sp-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sp-field-full{grid-column:1/-1}
+.sp-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;font-weight:600}
+.sp-sel{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;color:var(--text);width:100%;outline:none;cursor:pointer;font-size:12px}
+.sp-sel:focus{border-color:var(--accent);background:#fff}
+.benji-row{display:flex;align-items:center;gap:8px;margin-top:6px}
+.benji-row label{font-size:12px;color:var(--text2);cursor:pointer}
+.sp-tabs{display:flex;gap:3px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:10px}
+.sptab{font-size:11px;padding:4px 12px;border-radius:5px;cursor:pointer;color:var(--text3);border:none;background:transparent;font-family:'Inter',sans-serif;font-weight:500;transition:all .1s}
+.sptab:hover{color:var(--text);background:var(--surface2)}
+.sptab.on{color:var(--accent-text);background:var(--accent-bg)}
+.spsec{display:none}.spsec.on{display:block}
+.res-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:8px}
+.res-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;font-weight:600}
+.res-val{font-size:12px;color:var(--text2);line-height:1.55}
+.msg-btns{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.msg-btn{font-size:11px;padding:5px 12px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .1s;font-weight:500}
+.msg-btn:hover{background:var(--bg);color:var(--text)}
+.msg-btn.on{background:var(--accent-bg);color:var(--accent-text);border-color:#b6d9c4;font-weight:600}
+.msg-ta{width:100%;min-height:100px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-size:12px;line-height:1.6;resize:vertical;outline:none;margin-bottom:8px}
+.msg-ta:focus{border-color:var(--accent);background:#fff}
+.action-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.action-btn{font-size:11px;padding:6px 13px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .1s;font-weight:500}
+.action-btn:hover{background:var(--bg);color:var(--text)}
+.action-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.action-btn.primary:hover{opacity:.88}
+.copy-ok{font-size:11px;color:var(--accent);opacity:0;transition:opacity .3s;font-weight:500}
+.note-inp{width:100%;font-size:12px;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);outline:none}
+.note-inp:focus{border-color:var(--accent);background:#fff}
+.note-hint{font-size:11px;color:var(--text3);margin-top:5px}
+/* keep old #detail hidden */
+#detail{display:none!important}
+
+/* DASHBOARD */
+.dash-section{margin-bottom:28px}
+.dash-title{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:8px}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:all .1s}
+.dash-card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.dash-card-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:1px}
+.dash-card-co{font-size:11px;color:var(--text3);margin-bottom:6px}
+.dash-card-badges{display:flex;gap:4px;flex-wrap:wrap}
+.dash-card-note{font-size:11px;color:var(--text2);font-style:italic;margin-top:5px;border-top:1px solid var(--border);padding-top:5px}
+.benji-section{background:linear-gradient(135deg,#f0f9f4,#f5f3fe);border:1px solid #c7e5d4;border-radius:var(--radius-lg);padding:18px 20px;margin-bottom:24px}
+.benji-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--accent);margin-bottom:3px}
+.benji-sub{font-size:12px;color:var(--text3);margin-bottom:14px}
+
+/* MOBILE */
+@media(max-width:900px){
+  .contacts-layout.panel-open{grid-template-columns:1fr}
+  #side-panel{position:static;max-height:none}
+}
+@media(max-width:700px){
+  .table-head,.t-row{grid-template-columns:28px 1fr 100px 80px}
+  .t-row .t-track,.t-row .t-status,.t-row .note-cell,.table-head div:nth-child(4),.table-head div:nth-child(5),.table-head div:nth-child(7){display:none}
+  .main{padding:14px 16px}
+}
+.fade-in{animation:fi .18s ease}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">LTF<span>2026</span></div>
+  <div class="login-card">
+    <div class="login-label">Acceso Lulo Bank</div>
+    <input class="login-inp" type="text" id="li-user" placeholder="Usuario" autocomplete="username">
+    <input class="login-inp" type="password" id="li-pass" placeholder="Contraseña" autocomplete="current-password">
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="login-hint">LTF2026 · Confidencial</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav class="topnav">
+    <div class="nav-logo">LTF<span>2026</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab on" onclick="showPage('contacts',this)">Contactos</button>
+      <button class="nav-tab" onclick="showPage('dashboard',this)">Dashboard</button>
+    </div>
+    <div class="nav-right">
+      <div class="stat-pill">Marcados: <b id="nav-marked">0</b></div>
+      <div class="stat-pill">Benji: <b id="nav-benji">0</b></div>
+      <div class="stat-pill">Fondeo: <b id="nav-fondeo">0</b></div>
+      <button class="logout-btn" onclick="loadState()" title="Recargar datos compartidos">↻ Actualizar</button>
+      <button class="logout-btn" onclick="doLogout()">Salir</button>
+      <span id="sync-status" style="font-size:10px;color:var(--text3)"></span>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="page on" id="page-contacts">
+      <div class="stats-row" id="stats-row"></div>
+      <div class="controls">
+        <input class="search-inp" type="text" id="search" placeholder="Buscar nombre, empresa, cargo..." oninput="renderList()">
+        <select class="filter-sel" id="f-track" onchange="renderList()">
+          <option value="">Todos los tracks</option>
+          <option value="vip">VIP / Relación clave</option>
+          <option value="ecosistema">Ecosistema Lulo</option>
+          <option value="expansion">Expansión Latam</option>
+          <option value="comercial">Alianza Comercial</option>
+          <option value="inversor">Inversor VC/PE</option>
+          <option value="fondeo">Fondeo Institucional</option>
+          <option value="intel">Intel Competitiva</option>
+          <option value="colombia">Colombia</option>
+          <option value="cyber">AI & Cyber</option>
+        </select>
+        <select class="filter-sel" id="f-status" onchange="renderList()">
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="contactado">Contactado</option>
+          <option value="confirmado">Confirmado</option>
+        </select>
+        <button class="ctrl-btn" id="btn-marked" onclick="toggleMarked()">Solo marcados</button>
+        <button class="ctrl-btn" id="btn-benji" onclick="toggleBenji()">Solo Benji</button>
+      </div>
+      <div class="contacts-layout" id="contacts-layout">
+        <div>
+          <div class="table-wrap">
+            <div class="table-head">
+              <div></div><div>Nombre / Empresa</div><div>Track</div><div>Benji</div><div>Estado</div><div>Acción</div><div>Notas</div>
+            </div>
+            <div id="list-body"></div>
+          </div>
+          <div id="detail"></div>
+        </div>
+        <div id="side-panel"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-dashboard">
+      <div id="dash-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const USERS={'lulo':'ltf2026','benji':'lulo2026','martin':'ltf2026'};
+const TRACKS={
+  vip:        {label:'VIP / Relación clave',  cls:'b-red'},
+  ecosistema: {label:'Ecosistema Lulo',        cls:'b-green'},
+  expansion:  {label:'Expansión Latam',        cls:'b-teal'},
+  comercial:  {label:'Alianza Comercial',      cls:'b-blue'},
+  inversor:   {label:'Inversor VC/PE',         cls:'b-amber'},
+  fondeo:     {label:'Fondeo Institucional',   cls:'b-purple'},
+  intel:      {label:'Intel Competitiva',      cls:'b-orange'},
+  colombia:   {label:'Colombia',               cls:'b-teal'},
+  cyber:      {label:'AI & Cyber',             cls:'b-gray'},
+  '':         {label:'Sin asignar',            cls:'b-gray'}
+};
+const STATUS_COLORS={pendiente:'b-gray',contactado:'b-orange',confirmado:'b-green'};
+const STATUS_LABELS={pendiente:'Pendiente',contactado:'Contactado',confirmado:'Confirmado'};
+
+const GUESTS=[
+  {id:1,last:'Abbud',first:'Isis',title:'Co-Founder & Co-CEO',company:'Qive (Arquivei)'},
+  {id:2,last:'Abramovay',first:'Felipe',title:'Co-Founder & CEO',company:'Pilar'},
+  {id:3,last:'Acher',first:'Eric',title:'Co-Founder & Managing Partner',company:'Monashees'},
+  {id:4,last:'Aguiar',first:'Marcio',title:'Director Enterprise Sales LatAm',company:'Nvidia'},
+  {id:5,last:'Ahumada',first:'Luis',title:'CEO',company:'Mediastream'},
+  {id:6,last:'Ajnsztajn',first:'Mike',title:'Founder',company:'ACE Ventures'},
+  {id:7,last:'Albuquerque',first:'Rafael',title:'CEO',company:'Zoox Data'},
+  {id:8,last:'Aleman',first:'Ximena',title:'Co-Founder & Co-CEO',company:'Prometeo'},
+  {id:9,last:'Almaguer',first:'Sergio',title:'Founder & CEO',company:'Yaydoo'},
+  {id:10,last:'Almendra',first:'João',title:'CEO',company:'Icomm Group'},
+  {id:11,last:'Alvarez Demalde',first:'Arturo',title:'Managing Partner',company:'AD4'},
+  {id:12,last:'Alvarez-Demalde',first:'Francisco',title:'Co-Founder & Managing Partner',company:'Riverwood Capital'},
+  {id:13,last:'Amado',first:'Diego',title:'CTO',company:'Jobint'},
+  {id:14,last:'Amaro',first:'Daniele',title:'Founder',company:'Paytrack'},
+  {id:15,last:'Amper',first:'Ricardo',title:'Founder & CEO',company:'Incode Technologies'},
+  {id:16,last:'Arino',first:'Nicolas',title:'Head Listings & Capital Markets LatAm',company:'NYSE'},
+  {id:17,last:'Arippol',first:'Patrick',title:'Founding Partner',company:'Alexia Ventures'},
+  {id:18,last:'Arnt',first:'Pedro',title:'CEO',company:'dLocal'},
+  {id:19,last:'Aroulho',first:'Adriana',title:'President Latin America & Caribbean',company:'SAP'},
+  {id:20,last:'Auerbach',first:'Andrea',title:'Global Head of Private Investments',company:'Cambridge Associates'},
+  {id:21,last:'Avellar',first:'Rapha',title:'Founder & CEO',company:'BrandLovers AI'},
+  {id:22,last:'Avendano',first:'Joseline',title:'Vice President',company:'Riverwood Capital'},
+  {id:23,last:'Avila',first:'Sergio',title:'CEO',company:'Transbank'},
+  {id:24,last:'Avilla',first:'Vitor',title:'VP LatAm Technology IB',company:'Bank of America'},
+  {id:25,last:'Azevedo',first:'Felipe',title:'CEO',company:'LG lugar de gente'},
+  {id:26,last:'Azevedo',first:'Daniel',title:'CFO',company:'Nuvemshop / Tiendanube'},
+  {id:27,last:'Babatz',first:'Adolfo',title:'Founder & CEO',company:'Clip'},
+  {id:28,last:'Babe Ayuso',first:'Evaristo',title:'Co-Founder & CEO',company:'Pulpo'},
+  {id:29,last:'Bacili',first:'Kleber',title:'Founder & CEO',company:'Sensedia'},
+  {id:30,last:'Bajarlia',first:'Ilan',title:'Co-Founder & CEO',company:'Nocnoc'},
+  {id:31,last:'Balbinot',first:'Leandro',title:'CTO Whole Foods & VP Supply Chain',company:'Amazon'},
+  {id:32,last:'Bardengo',first:'Sebastian',title:'CEO',company:'Metrotel'},
+  {id:33,last:'Barni',first:'Federico',title:'CEO',company:'Jobint.com'},
+  {id:34,last:'Battan',first:'Mariano',title:'Founder',company:'Planta Network'},
+  {id:35,last:'Benenzon',first:'Nicolas',title:'CEO & Co-Founder',company:'Humand.co'},
+  {id:36,last:'Berardi',first:'Nicolas',title:'Founder & GP',company:'ANIMO Ventures'},
+  {id:37,last:'Bernardes',first:'Andre',title:'CEO',company:'Zippi'},
+  {id:38,last:'Bernardinelli',first:'Rodrigo',title:'CEO',company:'Digibee'},
+  {id:39,last:'Bettamio',first:'Alexandre',title:'Chairman Global Corporate & IB',company:'Bank of America'},
+  {id:40,last:'Bhatia',first:'Akash',title:'Senior Partner & Managing Director',company:'BCG'},
+  {id:41,last:'Biancardi Cirne',first:'Fernando',title:'Board Member',company:'LWSA / LG / Enjoei'},
+  {id:42,last:'Bibiloni',first:'Santiago',title:'Founder & CEO',company:'COR'},
+  {id:43,last:'Bilbao',first:'Daniel',title:'Co-Founder & CEO',company:'Truora Inc.'},
+  {id:44,last:'Bobrow',first:'Rodrigo',title:'Co-Founder & CEO',company:'Tela'},
+  {id:45,last:'Borchardt',first:'Juan',title:'Managing Director',company:'Deutsche Bank'},
+  {id:46,last:'Borges',first:'Alexandre',title:'Founder & CEO',company:'Grao Direto'},
+  {id:47,last:'Breyer',first:'Sidney',title:'Director & Founder',company:'Arcca'},
+  {id:48,last:'Bucher',first:'Steven',title:'SVP & Deputy Chief Security Officer',company:'Mastercard'},
+  {id:49,last:'Buffo Sempe',first:'German',title:'Director LatAm Tech IB',company:'Bank of America'},
+  {id:50,last:'Burger-Calderon',first:'Miguel',title:'Managing Partner',company:'BFF'},
+  {id:51,last:'Camarena',first:'Octavio',title:'CEO',company:'KIO'},
+  {id:52,last:'Campos',first:'Miguel',title:'Investor',company:'Canary'},
+  {id:53,last:'Capaverde',first:'Renan',title:'General Manager',company:'Nubank'},
+  {id:54,last:'Carbonell',first:'Henrique',title:'Co-Founder & CEO',company:'F360'},
+  {id:55,last:'Cardenas',first:'Hector',title:'CEO',company:'Conekta'},
+  {id:56,last:'Carinhena',first:'Caio',title:'Founder & CEO',company:'Clinicorp'},
+  {id:57,last:'Carranza',first:'Mariano',title:'CFO',company:'Clip'},
+  {id:58,last:'Carvalho',first:'Thiago',title:'MD Brazil Investment Banking',company:'J.P. Morgan'},
+  {id:59,last:'Carvalho',first:'Cesar',title:'Co-Founder & CEO',company:'Wellhub'},
+  {id:60,last:'Castillo',first:'Mariana',title:'Co-CEO',company:'Ben & Frank'},
+  {id:61,last:'Castillo',first:'Iñigo',title:'Head Latin America',company:'Incode Technologies'},
+  {id:62,last:'Catz',first:'Safra',title:'Board Exec Vice Chair & Former CEO',company:'Oracle'},
+  {id:63,last:'Chapman',first:'Guillermo',title:'Managing Partner',company:'Amador'},
+  {id:64,last:'Chester',first:'Federico',title:'Head LatAm Business Development',company:'Uber'},
+  {id:65,last:'Chueiri',first:'Pedro',title:'Founding Partner',company:'BZCP'},
+  {id:66,last:'Cisneros',first:'Adriana',title:'CEO',company:'Cisneros'},
+  {id:67,last:'Claure',first:'Marcelo',title:'Partner & Co-Chairman',company:'Brightstar Capital Partners'},
+  {id:68,last:'Cole',first:'Matthew',title:'CEO',company:'SUMA SaaS'},
+  {id:69,last:'Costa',first:'Daniel',title:'Co-CEO',company:'Cortex'},
+  {id:70,last:'Cristiano',first:'Cristiano',title:'Global Head IB Fixed Income & Equities',company:'Itaú BBA'},
+  {id:71,last:'Dagnoni',first:'Roberto',title:'CEO',company:'2TM | Mercado Bitcoin'},
+  {id:72,last:'de Cico',first:'Christian',title:'Co-CEO',company:'Qive (Arquivei)'},
+  {id:73,last:'De Los Rios',first:'Alfonso',title:'Co-Founder & CEO',company:'Nowports'},
+  {id:74,last:'De Los Santos',first:'Martin',title:'CFO',company:'Mercado Libre'},
+  {id:75,last:'de Luca',first:'Julia',title:'SVP Corporate Development',company:'Itaú Unibanco'},
+  {id:76,last:'De Pinho',first:'Joe',title:'Partner',company:'Riverwood Capital'},
+  {id:77,last:'de Souza',first:'Luiz',title:'Co-Founder & CPO',company:'Clinicorp'},
+  {id:78,last:'Del Valle',first:'João',title:'Co-Founder & CEO',company:'Ebanx'},
+  {id:79,last:'Delaney',first:'John',title:'Co-Founder & CEO',company:'Crown'},
+  {id:80,last:'Delangue',first:'Clem',title:'Co-Founder & CEO',company:'Hugging Face'},
+  {id:81,last:'della Maggiora',first:'Eduardo',title:'Founder & CEO',company:'Betterfly'},
+  {id:82,last:'Della Rocca',first:'Rodrigo',title:'Founder & CEO',company:'CondoConta'},
+  {id:83,last:'Derrico',first:'Paula',title:'SVP Business Development',company:'BNY'},
+  {id:84,last:'Diaz Tordoya',first:'Alfonso',title:'VP Technology and Operations',company:'Intercorp'},
+  {id:85,last:'Dinow',first:'Adam',title:'Partner',company:'Cooley'},
+  {id:86,last:'Duran',first:'Claudia',title:'Endeavor Miami Managing Director',company:'Endeavor'},
+  {id:87,last:'Dyzenchauz',first:'German',title:'Founder & CEO',company:'GOintegro'},
+  {id:88,last:'Echeverria',first:'Alvaro',title:'CEO',company:'SimpliRoute'},
+  {id:89,last:'Elias',first:'Paola',title:'Director Fintech',company:'Citi'},
+  {id:90,last:'Ellis',first:'Alonzo',title:'CISO',company:'Morgan Stanley'},
+  {id:91,last:'Ene Borges',first:'Danilo',title:'MD Head of M&A and Financial Sponsors',company:'Bradesco'},
+  {id:92,last:'Englebienne',first:'Guibert',title:'Co-Founder & President',company:'Globant'},
+  {id:93,last:'Espinosa',first:'Victor',title:'CIO',company:'BCI'},
+  {id:94,last:'Estebarena',first:'Gonzalo',title:'CEO',company:'Despegar'},
+  {id:95,last:'Etcheberry',first:'Cristina',title:'CEO',company:'Toku'},
+  {id:96,last:'Fabozzi',first:'Augusto',title:'SVP Multi Country Region South',company:'Oracle'},
+  {id:97,last:'Facchini',first:'Felipe',title:'CEO',company:'Stark Bank'},
+  {id:98,last:'Fagundes',first:'Felipe',title:'Vice President',company:'Riverwood Capital'},
+  {id:99,last:'Falestchi',first:'Demian',title:'CEO',company:'Kidscorp'},
+  {id:100,last:'Faria',first:'Pedro',title:'Chairman',company:'Petlove'},
+  {id:101,last:'Faustini',first:'Rodrigo',title:'CEO',company:'Wehandle'},
+  {id:102,last:'Fawzi',first:'Hussein',title:'Co-Founder',company:'Noa Partners'},
+  {id:103,last:'Ferber',first:'Yuryi',title:'CEO',company:'BRITech Global'},
+  {id:104,last:'Ferrari',first:'Bruno',title:'Co-Founder & CBO',company:'123Seguro'},
+  {id:105,last:'Ferraro',first:'Justo',title:'CEO',company:'Fudo'},
+  {id:106,last:'Ferrinho',first:'Luis',title:'Founder & CEO',company:'Omnibees'},
+  {id:107,last:'Fiegueiredo',first:'Gustavo',title:'CTO',company:'Mercado Bitcoin'},
+  {id:108,last:'Figueiredo',first:'Julia',title:'Director Business Development & IR',company:'Partners for Growth'},
+  {id:109,last:'Fischberg',first:'Thais',title:'President Latin America',company:'Adyen'},
+  {id:110,last:'Flores Ochoa',first:'Adalberto',title:'Co-Founder & CEO',company:'Kueski'},
+  {id:111,last:'Forcano Garcia',first:'Ricardo',title:'CTO',company:'Creditas'},
+  {id:112,last:'Forte',first:'Franco',title:'Co-Founder & CEO',company:'Mudafy'},
+  {id:113,last:'Franca',first:'Marcelo',title:'Founder & CEO',company:'Celcoin'},
+  {id:114,last:'Franck',first:'Juan',title:'Managing Partner',company:'SoftBank'},
+  {id:115,last:'Freire',first:'Guillermo',title:'Co-Founder & CEO',company:'Backchannel'},
+  {id:116,last:'Frenay',first:'Lucas',title:'Managing Director & Partner',company:'BCG'},
+  {id:117,last:'Frison',first:'Silvio',title:'Co-Founder & CEO',company:'Rivio'},
+  {id:118,last:'Furio',first:'Sergio',title:'Founder & CEO',company:'Creditas'},
+  {id:119,last:'Gadotti',first:'Fernando',title:'CEO',company:'Tako'},
+  {id:120,last:'Gallo',first:'Agustin',title:'CEO',company:'Prex'},
+  {id:121,last:'Gallone',first:'Martin',title:'Partner',company:'LuloBank'},
+  {id:122,last:'Ganem',first:'Matheus',title:'Co-Founder & CEO',company:'Seedz'},
+  {id:123,last:'Garayzar',first:'Marlene',title:'Co-Founder & CGO',company:'Stori Card'},
+  {id:124,last:'Garcia',first:'Alessandro',title:'Founder & CEO',company:'Solides'},
+  {id:125,last:'Gary',first:'Liliana',title:'President',company:'InvGate'},
+  {id:126,last:'Gath',first:'Matias',title:'Co-Founder',company:'Pulppo'},
+  {id:127,last:'Gaviria Halaby',first:'Laura',title:'Founder',company:'Apatat'},
+  {id:128,last:'Gerlach',first:'Christophe',title:'Co-Founder & CEO',company:'Comp'},
+  {id:129,last:'Gesto',first:'Ariel',title:'Founder & CEO',company:'InvGate'},
+  {id:130,last:'Giacomán Colyer',first:'Gerry',title:'Co-Founder & CEO',company:'Clara'},
+  {id:131,last:'Gilg',first:'Jan',title:'Global President Customer Success & Americas',company:'SAP'},
+  {id:132,last:'Ginobili',first:'Manu',title:'Advisor',company:'San Antonio Spurs'},
+  {id:133,last:'Godoy',first:'Manuel',title:'Co-Founder & CEO',company:'Felix Pago'},
+  {id:134,last:'Gomez',first:'Santiago',title:'Co-Founder & COO',company:'Simetrik'},
+  {id:135,last:'Gomez Gutierrez',first:'Fabian',title:'CEO',company:'Frubana'},
+  {id:136,last:'Gomez Romero',first:'Federico',title:'Head of Latam',company:'Cathay Innovation'},
+  {id:137,last:'Gomez Schumacher',first:'Federico',title:'GM Latin America',company:'Stellar'},
+  {id:138,last:'Gomide de Faria',first:'Mariano',title:'Founder & Co-CEO',company:'VTEX'},
+  {id:139,last:'Gon',first:'Cesar',title:'CEO',company:'CI&T'},
+  {id:140,last:'Goncalves',first:'Edson',title:'Founder',company:'Paytrack'},
+  {id:141,last:'González',first:'Eduardo',title:'Country Manager BBVA Spark Colombia & Argentina',company:'BBVA'},
+  {id:142,last:'Goyas',first:'Matheus',title:'COO',company:'Jusbrasil'},
+  {id:143,last:'Greenless',first:'Roderick',title:'Global Head of Investment Banking',company:'Itaú BBA'},
+  {id:144,last:'Grinberg',first:'Damian',title:'Head of IB Arg/Uru/Bol/Par',company:'J.P. Morgan'},
+  {id:145,last:'Grineberg',first:'Adriana',title:'Product Director',company:'Netflix'},
+  {id:146,last:'Gringaus',first:'Ariel',title:'CEO',company:'Colegium'},
+  {id:147,last:'Guillem',first:'Ricard',title:'Founder',company:'Cafler'},
+  {id:148,last:'Gurgel',first:'Fernando',title:'Founder & CEO',company:'Somapay'},
+  {id:149,last:'Guzmán',first:'Julio',title:'Co-Founder & CEO',company:'AgendaPro'},
+  {id:150,last:'Hagenbuch',first:'Florian',title:'Co-Founder',company:'Loft'},
+  {id:151,last:'Hauck',first:'Monica',title:'Co-Founder & CEO',company:'Solides'},
+  {id:152,last:'Hofstatter',first:'Helmuth',title:'Founder & CEO',company:'Logcomex'},
+  {id:153,last:'Howard',first:'Jason',title:'CEO',company:'Certta'},
+  {id:154,last:'Hyun',first:'Bonnie',title:'Head of US Capital Markets',company:'NYSE'},
+  {id:155,last:'Irigoyen',first:'Gaston',title:'CEO',company:'Pomelo'},
+  {id:156,last:'Iruretagoyena',first:'Jose Maria',title:'Co-Founder',company:'Healthatom'},
+  {id:157,last:'Iwamoto',first:'Henrique',title:'Chief Investment & Operations LatAm',company:'Prosus'},
+  {id:158,last:'Jacques',first:'Marcelo',title:'CSO',company:'DOCK'},
+  {id:159,last:'Jankovic',first:'Tijana',title:'Co-Founder',company:'Zeal'},
+  {id:160,last:'Janosky',first:'Keith',title:'CFO & MD Investor Relations',company:'Riverwood Capital'},
+  {id:161,last:'Jefet',first:'Itay',title:'CIO',company:'Group Liberty'},
+  {id:162,last:'Junqueira',first:'Cristina',title:'Co-Founder',company:'Nubank'},
+  {id:163,last:'Karachinsky',first:'Roman',title:'Chief Product Officer',company:'Incode Technologies'},
+  {id:164,last:'Karpovsky',first:'Alan',title:'Co-Founder & CEO',company:'Mendel'},
+  {id:165,last:'Kazah',first:'Hernan',title:'Co-Founder & Managing Partner',company:'Kaszek Ventures'},
+  {id:166,last:'Khan',first:'Zak',title:'Head of Financial Technology IB',company:'Deutsche Bank'},
+  {id:167,last:'Kreis',first:'Sebastián',title:'CEO',company:'Xepelin'},
+  {id:168,last:'Kundi',first:'Anish',title:'Global Head of Private Equity',company:'SAP'},
+  {id:169,last:'Lacerda',first:'Caetano',title:'Co-Founder & CEO',company:'Barte'},
+  {id:170,last:'Lacerda',first:'Talita',title:'CEO',company:'Petlove'},
+  {id:171,last:'Lalley',first:'Emma',title:'Head of Global Expansion',company:'OpenAI'},
+  {id:172,last:'Lau',first:'Maren',title:'VP Latam & Business Messaging Global Sales Lead',company:'Meta'},
+  {id:173,last:'Lecuyer',first:'Thibaud',title:'CEO',company:'LOGGI'},
+  {id:174,last:'Lehot',first:'Louis',title:'Partner',company:'Foley & Lardner LLP'},
+  {id:175,last:'Leite',first:'Marcos',title:'GM',company:'OLX Brazil'},
+  {id:176,last:'Lemann',first:'Lara',title:'Co-Founder & Managing Partner',company:'Maya Capital'},
+  {id:177,last:"Levi D'Ancona",first:'Mauro',title:'CEO',company:'180 Seguros'},
+  {id:178,last:'Levy',first:'Martin',title:'Co-Founder',company:'Turismocity'},
+  {id:179,last:'Lewit',first:'Rodrigo',title:'Co-Founder & CEO',company:'GeoVictoria'},
+  {id:180,last:'Lima',first:'Joaquim',title:'Partner',company:'Riverwood Capital'},
+  {id:181,last:'Lins',first:'Augusto',title:'Co-Founder & President',company:'Stone'},
+  {id:182,last:'Lisenberg',first:'Julian',title:'COO',company:'GeoPagos'},
+  {id:183,last:'Llamazares Vegh',first:'Juan Francisco',title:'CEO',company:'Stamm'},
+  {id:184,last:'Lombardo',first:'Marcelo',title:'Founder & CEO',company:'Omie'},
+  {id:185,last:'Lopez Gaffney',first:'Alberto',title:'EVP & Chief Strategy & Corporate Development',company:'Evertec'},
+  {id:186,last:'Macaya',first:'Jaime',title:'COO',company:'Kavak'},
+  {id:187,last:'Maceira',first:'Thiago',title:'Head of TMT Investment Banking',company:'Itaú BBA'},
+  {id:188,last:'Madach',first:'Stefan',title:'MD Head Technology Telecom Media',company:'XP Inc.'},
+  {id:189,last:'Mailland',first:'Lucas',title:'Founder & CEO',company:'Fichap'},
+  {id:190,last:'Maldonado',first:'Rodrigo',title:'MD Head of Latam Tech',company:'Morgan Stanley'},
+  {id:191,last:'Mantovanelli',first:'Eduardo',title:'CFO',company:'Stark Bank'},
+  {id:192,last:'Marietti',first:'Mateo',title:'Co-Founder & CEO',company:'CookUnity'},
+  {id:193,last:'Martel Seward',first:'Borja',title:'Co-Founder',company:'Roxom'},
+  {id:194,last:'Martin',first:'Frank',title:'Co-Founder',company:'PulpOS'},
+  {id:195,last:'Martinez',first:'Camilo',title:'Co-Founder & CEO',company:'Leal'},
+  {id:196,last:'Martins',first:'Ana',title:'General Partner',company:'Atlantico'},
+  {id:197,last:'Mata',first:'Javier',title:'Founder & CEO',company:'Yalo'},
+  {id:198,last:'Mattar',first:'Auana',title:'CIO',company:'TIM'},
+  {id:199,last:'Mattera',first:'Chuck',title:'Founder & CEO',company:'Avalanche Thinking'},
+  {id:200,last:'Mattiazzi',first:'Leonardo',title:'Co-Founder',company:'CI&I'},
+  {id:201,last:'Mayer',first:'Mariano',title:'Managing Partner',company:'Newtopia VC'},
+  {id:202,last:'Mazza',first:'Martin',title:'Regional General Manager LatAm',company:'Tools for Humanity'},
+  {id:203,last:'McColgan',first:'Courtney',title:'Founder & CEO',company:'Runa'},
+  {id:204,last:'McNulty',first:'Brynne',title:'Co-Founder & CEO',company:'Habi'},
+  {id:205,last:'Medeiros',first:'Juliano',title:'President',company:'Gupy'},
+  {id:206,last:'Mejía',first:'Sebastian',title:'Founder',company:'Tz.co'},
+  {id:207,last:'Mello',first:'Eduardo',title:'Executive Director',company:'Galapagos Capital'},
+  {id:208,last:'Mello',first:'Diego',title:'CFO',company:'Petlove'},
+  {id:209,last:'Mendes',first:'Lucas',title:'Founder & CEO',company:'Revelo'},
+  {id:210,last:'Mendez',first:'Martin',title:'CEO',company:'EPAM NEORIS'},
+  {id:211,last:'Migoya',first:'Martin',title:'Co-Founder & CEO',company:'Globant'},
+  {id:212,last:'Miguel Camacho',first:'Jorge',title:'Co-Founder & CEO',company:'Gopass'},
+  {id:213,last:'Milani Neto',first:'Adhemar',title:'CEO',company:'Kovi'},
+  {id:214,last:'Mitchell',first:'Manoela',title:'Co-Founder & CEO',company:'Pipo Saude'},
+  {id:215,last:'Moguel',first:'Ricardo',title:'Founder & CEO',company:'Clivi Health'},
+  {id:216,last:'Moller',first:'Stefan',title:'CEO',company:'Klar'},
+  {id:217,last:'Monteiro',first:'Fabio',title:'MD Partner IB Head Technology',company:'BTG Pactual'},
+  {id:218,last:'Moreno',first:'Andres',title:'Founder Chairman & CEO',company:'Open Education'},
+  {id:219,last:'Moscolini',first:'Nicolás',title:'Founder & CEO',company:'Wortise'},
+  {id:220,last:'Moura',first:'Matheus',title:'Co-Founder',company:'Avenia'},
+  {id:221,last:'Muguruza',first:'Santiago',title:'Head of BBVA Spark',company:'BBVA'},
+  {id:222,last:'Muxi',first:'Federico',title:'Managing Director & Senior Partner',company:'BCG'},
+  {id:223,last:'Nader',first:'Eduardo',title:'CEO',company:'Mercado Eletronico'},
+  {id:224,last:'Naor',first:'Martin',title:'Founder & CEO',company:'Bankingly'},
+  {id:225,last:'Neto',first:'Goldwasser',title:'Founder & CEO',company:'Accountfy & Tagor'},
+  {id:226,last:'Niemeyer',first:'Fernando',title:'SVP FIG & Fintech IB',company:'Itaú BBA'},
+  {id:227,last:'Nunes',first:'Jose',title:'Co-Founder & CEO',company:'Vetto'},
+  {id:228,last:'Nunez',first:'Julian',title:'Co-Founder & COO',company:'Yuno'},
+  {id:229,last:'Nunez Castro',first:'Sebastian',title:'CEO',company:'GeoPagos'},
+  {id:230,last:'OFarrell',first:'Tomas',title:'CEO',company:'Workana'},
+  {id:231,last:'Oliveira',first:'Roberto',title:'Co-Founder & CEO',company:'Blip'},
+  {id:232,last:'Oliveira',first:'Fabio',title:'Vice President',company:'Riverwood Capital'},
+  {id:233,last:'Oliveira',first:'Marcilio',title:'Co-Founder',company:'Sensedia'},
+  {id:234,last:'Olmedo Castellanos',first:'Lucas',title:'CEO',company:'Fligoo'},
+  {id:235,last:'Ontanon',first:'Santiago',title:'CIO',company:'COPPEL'},
+  {id:236,last:'Osorio',first:'Patricia',title:'Co-Founder & CCO',company:'Birdie'},
+  {id:237,last:'Packer',first:'Mike',title:'Partner',company:'QED Investors'},
+  {id:238,last:'Paladino',first:'Allan',title:'Co-Founder & CEO',company:'Lastro'},
+  {id:239,last:'Pardo',first:'Alberto',title:'Founder & CEO',company:'Adsmovil'},
+  {id:240,last:'Pares',first:'Fernando',title:'Founder & CEO',company:'ISA Saúde'},
+  {id:241,last:'Parisier',first:'Gaston',title:'Founder & Exec. Chairman',company:'Bigbox'},
+  {id:242,last:'Parks',first:'Jeff',title:'Co-Founder & Managing Partner',company:'Riverwood Capital'},
+  {id:243,last:'Paschoal',first:'Paula',title:'EVP Market Development LAC',company:'Mastercard'},
+  {id:244,last:'Patel',first:'Rohit',title:'Director Meta Superintelligence Labs',company:'Meta'},
+  {id:245,last:'Patjane Tame',first:'Alexis',title:'Founder & CEO',company:'99Minutos'},
+  {id:246,last:'Peire',first:'Matias',title:'Co-Founder & CEO',company:'GRIDX'},
+  {id:247,last:'Pencz',first:'Mate',title:'CEO',company:'Loft'},
+  {id:248,last:'Perdomo',first:'Cristobal',title:'General Partner',company:'Wollef'},
+  {id:249,last:'Peris',first:'Raul',title:'COO',company:'Fracttal'},
+  {id:250,last:'Perrelli',first:'Fernando',title:'CEO',company:'BYX'},
+  {id:251,last:'Peters',first:'Maximilian',title:'CEO',company:'Adapta'},
+  {id:252,last:'Phillips',first:'Lara',title:'Vice President',company:'Riverwood Capital'},
+  {id:253,last:'Pierucci',first:'Tomas',title:'Head of Innovation Economy Group',company:'J.P. Morgan'},
+  {id:254,last:'Pinheiro',first:'Gustavo',title:'Principal',company:'Riverwood Capital'},
+  {id:255,last:'Piquet',first:'Igor',title:'Head of LATAM Endeavor Catalyst',company:'Endeavor'},
+  {id:256,last:'Pittioni',first:'Lucas',title:'VP Legal Affairs Public Policy and M&A',company:'iFood'},
+  {id:257,last:'Porto',first:'Alex',title:'Partner',company:'Riverwood Capital'},
+  {id:258,last:'Possas',first:'Wagner',title:'Co-Founder & CPO',company:'Netlex'},
+  {id:259,last:'Pradere',first:'Javier',title:'Executive Director Mexico IB',company:'J.P. Morgan'},
+  {id:260,last:'Rabinovich',first:'Daniel',title:'COO',company:'Mercado Libre'},
+  {id:261,last:'Raimundo',first:'Cecilia',title:'Chief Data & Customer Intelligence Officer',company:'Aeropuertos Argentina'},
+  {id:262,last:'Rallo',first:'Antonio',title:'CEO',company:'ID345.TECH'},
+  {id:263,last:'Ramalho',first:'Luiz',title:'Co-Founder & CEO',company:'Magie/Unbank'},
+  {id:264,last:'Ramos de la Vega',first:'Carlos',title:'MD Venture Capital',company:'LAVCA'},
+  {id:265,last:'Ranallo',first:'Lucas',title:'Co-Founder & CEO',company:'Complif'},
+  {id:266,last:'Rangel',first:'Leonardo',title:'CEO',company:'Cortex'},
+  {id:267,last:'Rapetti',first:'Agustin',title:'Head of LatAm Technology IB',company:'J.P. Morgan'},
+  {id:268,last:'Raposo',first:'Fernando',title:'CEO',company:'AmigoTech'},
+  {id:269,last:'Ratafia',first:'Marcelo',title:'Vice President',company:'Goldman Sachs'},
+  {id:270,last:'Rehm',first:'Stefan',title:'Founder',company:'Intelipost'},
+  {id:271,last:'Reiss',first:'Sandro',title:'Founder',company:'Open Co'},
+  {id:272,last:'Remor',first:'Alexandre',title:'Co-Founder & CEO',company:'Medway'},
+  {id:273,last:'Remy',first:'Gaston',title:'Co-Founder & CEO',company:'Nuqlea'},
+  {id:274,last:'Ribeiro',first:'Tulio',title:'CEO',company:'Datamint'},
+  {id:275,last:'Richter',first:'David',title:'VP Business and Corporate Development',company:'DoorDash'},
+  {id:276,last:'Ripper',first:'Pedro',title:'Co-Founder & CEO',company:'Bemobi'},
+  {id:277,last:'Rivera',first:'Matias',title:'Co-Founder & CEO',company:'Fz Sports'},
+  {id:278,last:'Riveroll',first:'Rodrigo',title:'Managing Partner',company:'Union Bravo'},
+  {id:279,last:'Robbio',first:'Alex',title:'Co-Founder & CEO',company:'Glim'},
+  {id:280,last:'Roca',first:'Nicolas',title:'Head of Latin America IB',company:'Citi'},
+  {id:281,last:'Rodas',first:'Fabio',title:'Founder & CEO',company:'Shopper'},
+  {id:282,last:'Rodrigues',first:'Marcos',title:'Partner Head FIG IB',company:'XPI'},
+  {id:283,last:'Roer Kessler',first:'Mauricio',title:'Managing Director',company:'Marmi Asset Management'},
+  {id:284,last:'Rosemberg',first:'Francisco',title:'Head Wealth & Family Capital LatAm',company:'Blackrock'},
+  {id:285,last:'Rosenblatt',first:'Santiago',title:'Founder & CEO',company:'Strike'},
+  {id:286,last:'Rosengaus',first:'Sergio',title:'Founder & CEO',company:'Bleeding Edge Technologies'},
+  {id:287,last:'Ruales',first:'Sebastian',title:'Co-Founder & CEO',company:'Bia'},
+  {id:288,last:'Rumayor',first:'Inigo',title:'Founder & CEO',company:'Monato'},
+  {id:289,last:'Ruvolo',first:'Julie',title:'Head of Strategic Engagement',company:'NYSE'},
+  {id:290,last:'Saario',first:'Ross',title:'CEO',company:'Intelipost'},
+  {id:291,last:'Said',first:'Salvador',title:'Co-Founder & Managing Partner',company:'30N Ventures'},
+  {id:292,last:'Salem',first:'Ricardo',title:'Founder & CEO',company:'Flash Beneficios'},
+  {id:293,last:'Sallouti',first:'Roberto',title:'CEO',company:'BTG Pactual'},
+  {id:294,last:'Sampaio',first:'Marcelo',title:'Co-Founder & CEO',company:'Hashdex'},
+  {id:295,last:'Sandoval',first:'Alex',title:'Founder & CEO',company:'Allie'},
+  {id:296,last:'Sanroman de la Garza',first:'Jose Maria',title:'Co-Founder & CEO',company:'Kuona'},
+  {id:297,last:'Santos',first:'Eric',title:'Founder & Former CEO',company:'RD Station'},
+  {id:298,last:'Santos',first:'Mike',title:'Co-Founder & CEO',company:'Technysis'},
+  {id:299,last:'Scharra',first:'Marcus',title:'Co-Founder & CEO',company:'Segura'},
+  {id:300,last:'Scheurer',first:'Pamela',title:'CEO',company:'Nubimetrics'},
+  {id:301,last:'Schiaffino',first:'Lautaro',title:'Co-Founder & CEO',company:'Darwin AI'},
+  {id:302,last:'Schuessler',first:'Mac',title:'CEO & President',company:'Evertec'},
+  {id:303,last:'Selby',first:'Jack',title:'Managing Director',company:'Thiel Capital'},
+  {id:304,last:'Serrano',first:'Sebastian',title:'Co-Founder & CEO',company:'Ripio'},
+  {id:305,last:'Shapiro',first:'Jordan',title:'President GM Quantum Networking',company:'IonQ'},
+  {id:306,last:'Silva',first:'Thomas',title:'Managing Director',company:'Goldman Sachs'},
+  {id:307,last:'Silva Lombardi',first:'Cristobal',title:'Founder & Partner',company:'Kayyak Ventures'},
+  {id:308,last:'Sirota',first:'Dimitri',title:'Co-Founder & CEO',company:'BigID'},
+  {id:309,last:'Soares',first:'Antonio',title:'CEO',company:'DOCK'},
+  {id:310,last:'Sobreira',first:'João',title:'Co-Founder & CEO',company:'Advolve.ai'},
+  {id:311,last:'Sosa',first:'Santiago',title:'Co-Founder & CEO',company:'Nuvemshop / Tiendanube'},
+  {id:312,last:'Souza',first:'Carlos',title:'Co-Founder & COO',company:'Logcomex'},
+  {id:313,last:'Speranza',first:'Vincent',title:'Endeavor Mexico Managing Director',company:'Endeavor'},
+  {id:314,last:'Stark',first:'Rafael',title:'Founder & CEO',company:'Stark Bank'},
+  {id:315,last:'Stofenmacher',first:'David',title:'Founder',company:'S4Learning'},
+  {id:316,last:'Storani',first:'Federico',title:'Executive Director',company:'Riverwood Capital'},
+  {id:317,last:'Storf',first:'Douglas',title:'Founder & CEO',company:'Swap'},
+  {id:318,last:'Stranieri',first:'Sebastian',title:'CEO',company:'VU'},
+  {id:319,last:'Struve',first:'Christian',title:'Founder & CEO',company:'Fracttal'},
+  {id:320,last:'Szekasy',first:'Nicolas',title:'Co-Founder & Managing Partner',company:'Kaszek'},
+  {id:321,last:'Tangari',first:'Luiz',title:'CEO',company:'Tarken'},
+  {id:322,last:'Tarasiuk',first:'Al',title:'CISO',company:'Citi'},
+  {id:323,last:'Taylor',first:'Allen',title:'Endeavor Catalyst Managing Partner',company:'Endeavor'},
+  {id:324,last:'Teijeiro',first:'Alvaro',title:'Co-Founder & CTO',company:'RecargaPay'},
+  {id:325,last:'Teijeiro',first:'Rodrigo',title:'Founder & CEO',company:'RecargaPay'},
+  {id:326,last:'Tejerina',first:'Nicolas',title:'Investor & Advisor',company:'Jobint.com'},
+  {id:327,last:'Terán',first:'Maria Lourdes',title:'VP & Head Miami Office',company:'Americas Society'},
+  {id:328,last:'Thazhmon',first:'Dileep',title:'CEO',company:'Jeeves'},
+  {id:329,last:'Thiollier',first:'Andre',title:'Partner',company:'Foley & Lardner LLP'},
+  {id:330,last:'Thomaz',first:'Geraldo',title:'Founder & Co-CEO',company:'VTEX'},
+  {id:331,last:'Tognini',first:'Rodrigo',title:'Founder & CEO',company:'Conta Simples'},
+  {id:332,last:'Tonisi',first:'Luiz',title:'President LatAm',company:'Qualcomm'},
+  {id:333,last:'Toro Silva',first:'Julio',title:'CTO',company:'Copa Airlines'},
+  {id:334,last:'Torres',first:'Vitor',title:'Founder & CEO',company:'Contabilizei'},
+  {id:335,last:'Torto',first:'Christopher',title:'CEO',company:'Ascenty Data Centers'},
+  {id:336,last:'Trivellato',first:'Rodolpho',title:'Head of Corporate Bank',company:'Bradesco BBI'},
+  {id:337,last:'Trouillot',first:'Jean-Pierre',title:'Partner',company:'KPMG'},
+  {id:338,last:'Urthiague',first:'Juan',title:'CFO',company:'Globant'},
+  {id:339,last:'Valeriano',first:'Daniella',title:'Regional Director PanLATAM & Andean Region',company:'Meta'},
+  {id:340,last:'Valin',first:'Sebastian',title:'CEO',company:'ComparaOnline'},
+  {id:341,last:'Varella',first:'Gabriel',title:'MD Partner Co-Head of M&A',company:'XP Inc.'},
+  {id:342,last:'Vargas',first:'Lucas',title:'Co-Founder & CEO',company:'Nomad'},
+  {id:343,last:'Vega',first:'John Freddy',title:'Founder & CEO',company:'Platzi'},
+  {id:344,last:'Velasco',first:'Rodrigo',title:'Country Manager Mexico & LatAm Head',company:'BBVA'},
+  {id:345,last:'Velez',first:'David',title:'CEO',company:'Nubank'},
+  {id:346,last:'Venancio',first:'Rafael',title:'CIO',company:'Bradesco BBI'},
+  {id:347,last:'Victorica',first:'Gustavo',title:'Co-Founder & COO',company:'RecargaPay'},
+  {id:348,last:'Vidaguren',first:'Ignacio',title:'COO',company:'Aleph'},
+  {id:349,last:'Viguera',first:'Pablo',title:'Co-Founder & Co-CEO',company:'Belvo'},
+  {id:350,last:'Villegas',first:'Samuel',title:'MD Co-Head Mexico & Head Mortgages Latam',company:'Goldman Sachs'},
+  {id:351,last:'Villela Marino',first:'Ricardo',title:'Chairman',company:'Itaú Latam'},
+  {id:352,last:'Vinals',first:'Joan',title:'Managing Director & Partner',company:'BCG'},
+  {id:353,last:'Viol',first:'João',title:'Director Investment Banking',company:'Bradesco'},
+  {id:354,last:'Werthein',first:'Andres',title:'Partner',company:'Global Task'},
+  {id:355,last:'Wexler',first:'Patricia',title:'Founder & General Partner',company:'Avila VC'},
+  {id:356,last:'Whittle',first:'Jonathan',title:'Co-Founder & Managing Partner',company:'Quona Capital'},
+  {id:357,last:'Williams',first:'Eduardo',title:'CEO',company:'Contalink'},
+  {id:358,last:'Wolff',first:'Moritz',title:'Managing Director Latam',company:'Insider'},
+  {id:359,last:'Zabala',first:'Santiago',title:'Co-Founder & CEO',company:'Trafilea'},
+  {id:360,last:'Zago de Carvalho',first:'Eduardo',title:'Managing Director Latam',company:'Equinix'},
+  {id:361,last:'Zelerteins',first:'Gaston',title:'Founder & CEO',company:'Alephee'},
+  {id:362,last:'Zilberberg',first:'Eduardo',title:'Founding Partner',company:'BZCP'},
+  {id:363,last:'Zuzenberg',first:'Alejandro',title:'Founder',company:'Botmaker'},
+  {id:364,last:'Schwarzkopf',first:'Aron',title:'Founder & CEO',company:'Kushki'}
+];
+
+const AUTO={
+  'Daniel Rabinovich':        {track:'vip',      benji:true},
+  'Francisco Alvarez-Demalde':{track:'vip',      benji:true},
+  'Cristina Junqueira':       {track:'intel',    benji:true},
+  'David Velez':              {track:'intel',    benji:false},
+  'Renan Capaverde':          {track:'intel',    benji:false},
+  'Martin De Los Santos':     {track:'intel',    benji:false},
+  'Stefan Moller':            {track:'intel',    benji:false},
+  'Aron Schwarzkopf':         {track:'comercial',benji:false},
+  'Pedro Arnt':               {track:'comercial',benji:true},
+  'Alberto Lopez Gaffney':    {track:'comercial',benji:true},
+  'Mac Schuessler':           {track:'comercial',benji:true},
+  'Rodrigo Teijeiro':         {track:'comercial',benji:false},
+  'Daniel Bilbao':            {track:'colombia', benji:false},
+  'Julian Nunez':             {track:'colombia', benji:false},
+  'Santiago Gomez':           {track:'colombia', benji:false},
+  'Camilo Martinez':          {track:'colombia', benji:false},
+  'Fabian Gomez Gutierrez':   {track:'colombia', benji:false},
+  'Laura Gaviria Halaby':     {track:'colombia', benji:false},
+  'Hernan Kazah':             {track:'inversor', benji:true},
+  'Nicolas Szekasy':          {track:'inversor', benji:false},
+  'Mike Packer':              {track:'inversor', benji:true},
+  'Juan Franck':              {track:'inversor', benji:true},
+  'Jonathan Whittle':         {track:'inversor', benji:false},
+  'Ana Martins':              {track:'inversor', benji:false},
+  'Patricia Wexler':          {track:'inversor', benji:false},
+  'Marcelo Claure':           {track:'inversor', benji:true},
+  'Lara Lemann':              {track:'inversor', benji:false},
+  'Eduardo González':         {track:'fondeo',   benji:true},
+  'Roberto Sallouti':         {track:'fondeo',   benji:true},
+  'Cristiano Cristiano':      {track:'fondeo',   benji:true},
+  'Francisco Rosemberg':      {track:'fondeo',   benji:false},
+  'Andrea Auerbach':          {track:'fondeo',   benji:false},
+  'Jack Selby':               {track:'fondeo',   benji:false},
+  'Roderick Greenless':       {track:'fondeo',   benji:true},
+  'Ricardo Villela Marino':   {track:'fondeo',   benji:true},
+  'Henrique Iwamoto':         {track:'fondeo',   benji:false},
+  'Ricardo Amper':            {track:'cyber',    benji:false},
+  'Marcus Scharra':           {track:'cyber',    benji:false},
+  'Emma Lalley':              {track:'cyber',    benji:true},
+  'Dimitri Sirota':           {track:'cyber',    benji:false},
+  'Clem Delangue':            {track:'cyber',    benji:true},
+  'Leandro Balbinot':         {track:'cyber',    benji:false},
+  'Maren Lau':                {track:'ecosistema',benji:false},
+  'Rohit Patel':              {track:'ecosistema',benji:false},
+  'Daniella Valeriano':       {track:'ecosistema',benji:false},
+  'Gaston Irigoyen':          {track:'ecosistema',benji:false},
+  'Pablo Viguera':            {track:'ecosistema',benji:false},
+  'Roberto Dagnoni':          {track:'ecosistema',benji:false},
+  'Thais Fischberg':          {track:'ecosistema',benji:false},
+  'Paula Paschoal':           {track:'ecosistema',benji:false},
+  'Lucas Ranallo':            {track:'ecosistema',benji:false},
+  'Dileep Thazhmon':          {track:'ecosistema',benji:false},
+  'Lucas Vargas':             {track:'expansion', benji:false},
+  'Geraldo Thomaz':           {track:'expansion', benji:false},
+  'Federico Chester':         {track:'expansion', benji:false},
+  'Adolfo Babatz':            {track:'expansion', benji:false},
+  'Gerry Giacomán Colyer':    {track:'expansion', benji:false},
+  'Rodrigo Maldonado':        {track:'vip',       benji:false},
+};
+
+const RESEARCH={
+  'Daniel Rabinovich':{inv:'Mercado Libre cotiza NYSE (MELI ~$80B cap). Inst: Baillie Gifford, Capital Group, Vanguard, BlackRock.',ali:'PayPal, Visa, Meta/WhatsApp Pay, Amazon AWS. MercadoPago compite con Lulo en crédito Colombia.',ctx:'COO de Meli. Relación existente profunda. Panel AI viernes 11:15am. Clave para intel MercadoPago Colombia.'},
+  'Francisco Alvarez-Demalde':{inv:'Riverwood Capital ~$3B AUM. LPs: endowments, family offices institucionales.',ali:'Portfolio: Lulo Bank, VTEX, Gympass, Clip, Incode, RecargaPay.',ctx:'Co-fundador y organizador del LTF. Relación estratégica de largo plazo. Puede conectar con todo el portafolio.'},
+  'Cristina Junqueira':{inv:'Nubank: Berkshire Hathaway, Sequoia, Tiger Global, DST Global, GIC. IPO NYSE 2021, cap ~$55B.',ali:'Mastercard, OpenAI (2024), Google Pay, Apple Pay. Colombia: producto crédito activo.',ctx:'Co-fundadora Nubank. Keynote 9:15am. Competencia directa en Colombia. Entender tesis andina.'},
+  'David Velez':{inv:'Nubank: Berkshire Hathaway, Sequoia, Tiger Global. Cap ~$55B.',ali:'OpenAI partnership 2024, Mastercard, Google. Activos Colombia.',ctx:'CEO Nubank. Difícil de acceder pero presente. Pregunta: tesis Nubank mercado andino 2026-2028.'},
+  'Aron Schwarzkopf':{inv:'Kushki: Series B $100M. SoftBank + QED Investors + Kaszek + Endeavor.',ali:'Mastercard, Visa, bancos locales Colombia/México/Ecuador/Perú.',ctx:'Founder Kushki. Infraestructura de pagos embebida en Colombia. Alianza comercial de primer nivel para Lulo.'},
+  'Pedro Arnt':{inv:'dLocal: IPO NASDAQ 2021. General Atlantic, Tiger Global, Alkeon. Cap ~$3B.',ali:'Amazon, Netflix, Spotify, Uber, Rappi. Operan en Colombia.',ctx:'CEO dLocal. Pagos cross-border 40+ mercados. Integrar para transferencias internacionales de Lulo.'},
+  'Hernan Kazah':{inv:'Kaszek: ~$3.5B AUM. LPs: endowments universitarios, family offices globales.',ali:'Portfolio: Nubank, Kavak, Creditas, QuintoAndar, Merama.',ctx:'Co-fundador Kaszek. Mayor VC Latam. Tienen posición en competidores — calificar conflict of interest primero.'},
+  'Mike Packer':{inv:'QED Investors: ~$4B AUM. Foco 100% fintech global.',ali:'Portfolio: Nubank (early), Creditas, dLocal, Konfio, Uala.',ctx:'Partner QED. El VC fintech más especializado del mundo. Convicción en Colombia creciente.'},
+  'Juan Franck':{inv:'SoftBank Latam Fund: $8B AUM.',ali:'Rappi, Kavak, MadeiraMadeira, Creditas, Loft.',ctx:'Managing Partner SoftBank Latam. Cheques $50M-$200M. Verificar si siguen desplegando fintech activamente.'},
+  'Jonathan Whittle':{inv:'Quona Capital: ~$500M AUM. IFC, Omidyar Network como LPs.',ali:'Portfolio: Konfio, Destacame, Klar, Cobru Colombia.',ctx:'Co-fundador Quona. Tesis explícita inclusión financiera Latam. Alto fit con misión Lulo.'},
+  'Eduardo González':{inv:'BBVA Spark: capital de BBVA directamente. Inversión + alianza simultáneos.',ali:'50+ fintechs España y Latam. Foco Colombia y Argentina.',ctx:'Country Manager BBVA Spark Colombia. Puede ser inversor + socio comercial al mismo tiempo.'},
+  'Roberto Sallouti':{inv:'BTG Pactual: banco de inversión cotizado B3. Uno de los mayores de Latam.',ali:'BTG Colombia: operaciones IB y asset management activas.',ctx:'CEO BTG. Fondeo institucional clave — líneas de crédito, deuda, posible co-inversión.'},
+  'Cristiano Cristiano':{inv:'Itaú BBA: brazo IB de Itaú Unibanco, el banco más grande de Latam.',ali:'Itaú tiene operaciones en Colombia. Activo en fintech financing.',ctx:'Global Head IB Itaú BBA. Fondeo institucional — líneas de deuda baratas para Lulo.'},
+  'Roderick Greenless':{inv:'Itaú BBA: mismo grupo que Cristiano.',ali:'Global Head IB de Itaú. Acceso al más alto nivel del banco.',ctx:'Global Head IB Itaú BBA. Junto con Cristiano son los dos contactos clave de Itaú para fondeo.'},
+  'Ricardo Villela Marino':{inv:'Itaú Latam: Chairman del banco. Posición accionaria directa.',ali:'Itaú opera en 18 países Latam incluyendo Colombia.',ctx:'Chairman Itaú Latam. El contacto de máximo nivel en Itaú. Conversación estratégica de largo plazo.'},
+  'Ricardo Amper':{inv:'Incode: Series B $220M. SoftBank, JP Morgan, General Atlantic.',ali:'Bancos México, Colombia, gobierno México. Alianza con Oracle.',ctx:'Founder Incode. AI identity verification con presencia directa Colombia. Partner para onboarding + antifraude Lulo.'},
+  'Emma Lalley':{inv:'OpenAI: valuación $157B. Microsoft ($13B), Thrive Capital, Tiger Global, a16z.',ali:'Nubank (2024), Klarna, Morgan Stanley. Expansión agresiva Latam.',ctx:'Head Global Expansion OpenAI. Panel 4:30pm. Buscan partners financieros Latam. Lulo como caso de uso Colombia.'},
+  'Clem Delangue':{inv:'Hugging Face: Series D $235M. Salesforce, Google, Amazon, Nvidia.',ali:'Fortune 500 como clientes. Integración AWS, Azure, GCP.',ctx:'CEO Hugging Face. Panel AI 11:15am. Open-source AI para servicios financieros. Explorar modelos para Lulo.'},
+  'Marcelo Claure':{inv:'Brightstar Capital Partners ~$1B. Prev: COO SoftBank.',ali:'Portfolio: telecom, fintech, consumer Latam.',ctx:'Capital estratégico flexible. Red enorme — ex COO SoftBank conoce todo el ecosistema Latam.'},
+  'Gaston Irigoyen':{inv:'Pomelo: Series B $40M. Tiger Global, Kaszek, Endeavor.',ali:'Infraestructura de tarjetas para fintechs Latam.',ctx:'CEO Pomelo. Card issuing como servicio. Ecosistema Lulo: Pomelo potencia el producto de tarjetas sin construirlo desde cero.'},
+  'Maren Lau':{inv:'Meta: cotiza NASDAQ, cap ~$1.3T.',ali:'WhatsApp Pay activo Brasil. Expansión Latam. Alianzas con bancos locales.',ctx:'VP Latam Meta. WhatsApp domina Colombia. Integración Lulo-WhatsApp para pagos y CS — ventaja competitiva real.'},
+  'Lucas Vargas':{inv:'Nomad: Series B $61M. Monashees, Stripes, Ribbit Capital.',ali:'Foco en brasileños en el exterior. Servicios USD/globales.',ctx:'CEO Nomad. Banco digital cross-border. Aprender playbook para que Lulo expanda fuera de Colombia.'},
+  'Pablo Viguera':{inv:'Belvo: Series A $43M. Founders Fund, Kaszek, Y Combinator.',ali:'APIs open finance para bancos y fintechs en Latam.',ctx:'Co-fundador Belvo. Open finance APIs — infraestructura para potenciar la estrategia de datos de Lulo.'},
+  'Dileep Thazhmon':{inv:'Jeeves: Series C $180M. Andreessen Horowitz, CRV.',ali:'Tarjetas corporativas y gastos en Latam. Operan en Colombia.',ctx:'CEO Jeeves. B2B fintech para gastos corporativos. Modelo complementario a Lulo — posible alianza de distribución.'},
+  'Lucas Ranallo':{inv:'Complif: etapa temprana. Y Combinator.',ali:'Compliance automatizado para fintechs en Latam.',ctx:'CEO Complif. Compliance como servicio — relevante para escalar el equipo regulatorio de Lulo eficientemente.'},
+  'Francisco Rosemberg':{inv:'BlackRock: $10T AUM. Mayor asset manager del mundo.',ali:'Foco en Latam wealth y mercados de capital.',ctx:'Head Wealth & Family Capital Latam. Capital institucional de escala. Relevante para ronda tardía o IPO.'},
+  'Andrea Auerbach':{inv:'Cambridge Associates: asesora +$500B. Harvard, MIT, Stanford.',ali:'No invierte directo — asesora a los grandes LPs.',ctx:'Global Head Private Investments. Construir narrativo hacia grandes allocators previo a ronda tardía o IPO.'},
+  'Alberto Lopez Gaffney':{inv:'Evertec: público NYSE (EVTC). Vanguard, BlackRock, Apollo.',ali:'Bancolombia, Davivienda, Popular. Relación existente con Lulo.',ctx:'EVP Evertec. Relación existente. Profundizar vínculo y alinear roadmap. Mac Schuessler también presente.'},
+  'Mac Schuessler':{inv:'Evertec: público NYSE. Cap ~$2B.',ali:'Mastercard, Visa, bancos regionales Colombia incluido.',ctx:'CEO Evertec. Relación existente de Lulo. Consolidar relación al más alto nivel.'},
+};
+
+const MSG={
+  vip:{
+    informal:p=>`${p.first}! Todo confirmado para el LTF en Miami. Tenemos que encontrar un momento tranquilo fuera de la agenda para ponernos al día — hay cosas interesantes que quiero contarte de Lulo. ¿Desayuno el viernes antes de las sesiones, o algo después de la recepción del jueves?`,
+    formal:p=>`Estimado ${p.first},\n\nEspero que estés muy bien. Confirmado para el LTF2026 y con gusto saber que coincidiremos.\n\nMe gustaría encontrar un espacio fuera de la agenda formal — un desayuno el viernes o una conversación después de la recepción del jueves. Tengo temas de Lulo que me gustaría compartir contigo.\n\n¿Coordinas algo?\n\nSaludos,`
+  },
+  ecosistema:{
+    informal:p=>`${p.first}, nos vemos en el LTF! Soy de Lulo Bank — banco digital líder en Colombia. Creo que hay algo muy interesante entre lo que hace ${p.company} y el ecosistema que estamos construyendo. ¿Nos tomamos 20 minutos?`,
+    formal:p=>`Estimado ${p.first},\n\nAnticipando el LTF2026, me contacto porque veo una sinergia concreta entre ${p.company} y el ecosistema de Lulo Bank en Colombia.\n\n¿20 minutos durante el evento?\n\nCordialmente,`
+  },
+  expansion:{
+    informal:p=>`${p.first}! LTF se acerca. Soy de Lulo Bank en Colombia. Estamos evaluando expansión en Latam y la experiencia de ${p.company} es muy relevante. ¿Conversamos durante el evento?`,
+    formal:p=>`Estimado ${p.first},\n\nLulo Bank está en proceso de evaluación de expansión regional en Latam y la trayectoria de ${p.company} es una referencia clave.\n\n¿20 minutos en el LTF?\n\nSaludos,`
+  },
+  comercial:{
+    informal:p=>`${p.first}, nos vemos en el LTF! Soy de Lulo Bank en Colombia. Creo que hay una conversación comercial interesante entre ${p.company} y nosotros. ¿20 minutos?`,
+    formal:p=>`Estimado ${p.first},\n\nLulo Bank es el banco digital líder en Colombia. Veo una oportunidad concreta de explorar una alianza con ${p.company}.\n\n¿20 minutos en el LTF2026?\n\nCordialmente,`
+  },
+  inversor:{
+    informal:p=>`${p.first}, nos vemos en el LTF. Soy de Lulo Bank en Colombia — crecimiento fuerte, mercado enorme. Sin pitch, solo conversación. ¿15 minutos en Miami?`,
+    formal:p=>`Estimado ${p.first},\n\nAnticipando el LTF2026, me gustaría presentar a Lulo Bank y conocer la perspectiva de ${p.company} sobre el mercado fintech andino.\n\n¿15 minutos durante el evento?\n\nSaludos,`
+  },
+  fondeo:{
+    informal:p=>`${p.first}! LTF confirmado. Soy de Lulo Bank en Colombia. Estamos explorando instrumentos de fondeo institucional para escalar. Me gustaría intercambiar con ${p.company}. ¿Un café?`,
+    formal:p=>`Estimado ${p.first},\n\nLulo Bank está explorando instrumentos de fondeo institucional para acelerar su crecimiento en Colombia. Dado el perfil de ${p.company}, creo que hay una conversación relevante.\n\n¿Un espacio en el LTF?\n\nCordialmente,`
+  },
+  intel:{
+    informal:p=>`${p.first}, nos vemos en el LTF! Siempre útil hablar con quienes construyen en espacios cercanos. Soy de Lulo Bank. ¿Intercambiamos perspectivas?`,
+    formal:p=>`Estimado ${p.first},\n\nMe gustaría encontrar un momento en el LTF2026 para intercambiar perspectivas sobre el mercado.\n\n¿Conversamos?\n\nSaludos,`
+  },
+  colombia:{
+    informal:p=>`${p.first}! LTF Miami. Soy de Lulo Bank — el banco digital líder en Colombia. Con ${p.company} también en el mercado colombiano, creo que hay mucho para intercambiar. ¿Un espacio?`,
+    formal:p=>`Estimado ${p.first},\n\nComo banco digital líder en Colombia y dado que ${p.company} también opera en el mercado, creo que hay una conversación muy valiosa para tener en el LTF2026.\n\n¿20 minutos?\n\nSaludos,`
+  },
+  cyber:{
+    informal:p=>`${p.first}! Nos vemos en el LTF. Soy de Lulo Bank — banco digital con ambiciones grandes en AI y seguridad. ${p.company} es muy relevante para nuestra hoja de ruta. ¿15 minutos?`,
+    formal:p=>`Estimado ${p.first},\n\n${p.company} es directamente relevante para la agenda de AI y ciberseguridad de Lulo Bank.\n\n¿15 minutos en el LTF?\n\nSaludos,`
+  }
+};
+
+const CO_INFO={
+  'Qive (Arquivei)':{ind:'SaaS / Documentos Fiscales',desc:'Automatización de documentos fiscales y NFe en Brasil. Digitaliza la relación entre empresas y sus documentos tributarios.',prod:'Gestión NFe, consulta Receita Federal, automatización fiscal'},
+  'Pilar':{ind:'HR Tech',desc:'Plataforma de gestión de personas para startups y pymes en Latam.',prod:'HRIS, onboarding digital, contratos laborales'},
+  'Monashees':{ind:'Venture Capital',desc:'VC enfocado en startups de etapa temprana en Brasil y Latam. Uno de los fondos seed más activos.',prod:'Fund I-VI, portafolio incluye Nubank, Creditas, Loggi'},
+  'Nvidia':{ind:'Semiconductores / AI',desc:'Líder global en GPUs e infraestructura de inteligencia artificial. Proveedor clave para AI, cloud y data centers.',prod:'GPUs H100/A100, CUDA, DGX Systems, Omniverse'},
+  'Mediastream':{ind:'Streaming / Media Tech',desc:'Plataforma de video streaming y distribución de contenido para broadcasters y medios en Latam.',prod:'Video OTT, CDN, monetización de contenido'},
+  'ACE Ventures':{ind:'Venture Capital / Aceleración',desc:'Aceleradora y fondo de VC enfocado en Brasil con programas de aceleración + capital seed.',prod:'Aceleración, seed funding, red de mentores'},
+  'Zoox Data':{ind:'Data / Analytics',desc:'Plataforma de análisis de datos de mercado y comportamiento del consumidor para retailers.',prod:'Market intelligence, análisis competitivo, dashboards'},
+  'Prometeo':{ind:'Open Banking / APIs',desc:'API de open banking que conecta con más de 50 bancos en Latam para acceder a datos financieros.',prod:'Banking APIs, verificación de cuentas, transferencias'},
+  'Yaydoo':{ind:'B2B Payments / Fintech',desc:'Plataforma de pagos y gestión de cuentas por pagar para empresas en México y Latam.',prod:'AP automation, pagos B2B, gestión de facturas'},
+  'AD4':{ind:'Private Equity / VC',desc:'Family office e inversiones en tecnología y consumo en Latam. Manejado por Arturo Alvarez-Demalde.',prod:'Inversiones directas, co-inversiones tecnología'},
+  'Riverwood Capital':{ind:'Growth Equity / VC',desc:'Fondo de growth equity (~$3B AUM) en tecnología en Latam. Organizador del LTF2026.',prod:'Portfolio: Lulo Bank, VTEX, Gympass, Clip, Incode, RecargaPay'},
+  'Jobint':{ind:'HR Tech / Recruiting AI',desc:'Plataforma de inteligencia artificial para reclutamiento y matching de talento tech en Latam.',prod:'AI recruiting, job matching, screening automatizado'},
+  'Paytrack':{ind:'Fintech / Gastos Corporativos',desc:'Plataforma de gestión de gastos de viaje y corporativos para empresas en Brasil.',prod:'Gestión de gastos, reembolsos, política de gastos'},
+  'Incode Technologies':{ind:'AI / Biometría / KYC',desc:'Plataforma de verificación de identidad con AI y biometría. Usada por bancos y fintechs en Latam para onboarding digital.',prod:'Verificación de identidad, KYC, biometría facial, prevención de fraude'},
+  'NYSE':{ind:'Mercados de Capital',desc:'New York Stock Exchange — la bolsa más grande del mundo. Listados, IPOs y mercado secundario.',prod:'Listados de valores, IPO advisory, capital markets'},
+  'Alexia Ventures':{ind:'Venture Capital',desc:'Fondo de VC etapa temprana con foco en founders latinoamericanos.',prod:'Pre-seed y seed en startups Latam'},
+  'dLocal':{ind:'Payments / Cross-border',desc:'Plataforma de pagos cross-border para merchants globales en mercados emergentes. Procesa en 40+ países incluyendo Latam.',prod:'Procesamiento de pagos, métodos locales, payouts, FX'},
+  'SAP':{ind:'Enterprise Software / ERP',desc:'Líder global en software ERP y soluciones empresariales. Co-diseñó sesiones del LTF. Patrocinador Platinum.',prod:'SAP S/4HANA, SAP BTP, SAP SuccessFactors, SAP Ariba'},
+  'Cambridge Associates':{ind:'Investment Advisory',desc:'Firma global de asesoría en inversiones para endowments, fundaciones y family offices. Asesora Harvard, MIT, Stanford.',prod:'Investment advisory, private equity consulting, portfolio management'},
+  'BrandLovers AI':{ind:'Marketing Tech / AI',desc:'Plataforma de influencer marketing con AI en Brasil. Conecta marcas con creadores de contenido.',prod:'Influencer marketplace, campañas de contenido, analytics'},
+  'Transbank':{ind:'Payments / Chile',desc:'Principal procesador de pagos de Chile. Red de POS y pagos electrónicos para el mercado chileno.',prod:'Procesamiento de pagos, POS, pagos online Chile'},
+  'Bank of America':{ind:'Banca de Inversión Global',desc:'Uno de los mayores bancos del mundo. División LatAm Technology IB asesora en M&A y mercados de capital para tech.',prod:'M&A advisory, equity capital markets, debt capital markets'},
+  'LG lugar de gente':{ind:'HR Tech / SaaS',desc:'Software de gestión de capital humano (HCM) para grandes empresas en Brasil.',prod:'HCM, nómina, gestión de beneficios, compliance laboral'},
+  'Nuvemshop / Tiendanube':{ind:'E-commerce SaaS',desc:'Plataforma de e-commerce líder en Latam para pymes. Similar a Shopify para el mercado latinoamericano.',prod:'Storefront, pagos, logística, marketing tools'},
+  'Clip':{ind:'Fintech / Payments / México',desc:'Líder en terminales de pago (mPOS) y servicios financieros para pequeños negocios en México. Compite con Square.',prod:'mPOS, crédito para negocios, pagos QR, gestión de ventas'},
+  'Pulpo':{ind:'Advertising Tech',desc:'Plataforma de publicidad digital y gestión de audiencias para medios y anunciantes en Latam.',prod:'Programmatic advertising, DMP, gestión de audiencias'},
+  'Sensedia':{ind:'API Management',desc:'Plataforma de gestión de APIs e integración para empresas en Brasil y Latam. Habilita ecosistemas digitales y open banking.',prod:'API gateway, gestión de APIs, integración, open banking'},
+  'Nocnoc':{ind:'Cross-border E-commerce',desc:'Permite a vendedores de Latam vender en marketplaces globales como Amazon, eBay y Walmart.',prod:'Cross-border selling, fulfillment, marketplace integration'},
+  'Amazon':{ind:'E-commerce / Cloud / Tech',desc:'Gigante global de e-commerce, cloud computing (AWS) y tecnología. Leandro Balbinot es CTO de Whole Foods.',prod:'AWS, marketplace, Alexa, Prime, Whole Foods'},
+  'Metrotel':{ind:'Telecomunicaciones',desc:'Empresa de telecomunicaciones y conectividad para empresas en Argentina.',prod:'Fibra óptica, cloud services, datacenter, networking'},
+  'Planta Network':{ind:'Wellness / Consumer',desc:'Red social y plataforma de contenido sobre alimentación plant-based y bienestar.',prod:'App de recetas, comunidad, contenido de salud'},
+  'Humand.co':{ind:'HR Tech / Internal Comms',desc:'Plataforma de comunicación interna y engagement de empleados. Intranet moderna tipo app móvil.',prod:'App de empleados, comunicación interna, cultura corporativa'},
+  'ANIMO Ventures':{ind:'Venture Capital',desc:'Fondo de VC enfocado en startups de etapa temprana en Argentina y Latam.',prod:'Seed e early-stage investments Latam'},
+  'Zippi':{ind:'Fintech / Crédito PYME',desc:'Plataforma de capital de trabajo y crédito para pequeñas empresas en Brasil.',prod:'Capital de trabajo, antecipo de facturas, crédito PYME'},
+  'Digibee':{ind:'Integration Platform / iPaaS',desc:'Plataforma de integración low-code para conectar sistemas empresariales en Latam.',prod:'Integración empresarial, conectores, automatización de procesos'},
+  'BCG':{ind:'Consultoría Estratégica',desc:'Boston Consulting Group — Big 3 consultora global. Co-diseñó sesiones ejecutivas del LTF2026.',prod:'Estrategia, digital transformation, M&A, operaciones'},
+  'COR':{ind:'Project Management SaaS',desc:'Plataforma de gestión de proyectos y rentabilidad para agencias de publicidad y servicios creativos.',prod:'Project management, tiempo, facturación, rentabilidad'},
+  'Truora Inc.':{ind:'Identity / KYC / Latam',desc:'Plataforma de verificación de identidad, KYC y background checks para empresas en Latam. Nació en Colombia.',prod:'KYC, background checks, validación documental, WhatsApp automation'},
+  'Tela':{ind:'Retail Tech / ERP',desc:'Plataforma de gestión para negocios de moda y retail en Brasil. ERP + e-commerce integrado.',prod:'ERP retail, e-commerce, inventario, punto de venta'},
+  'Deutsche Bank':{ind:'Banca de Inversión Global',desc:'Banco alemán global con fuerte presencia en mercados de capital y banca corporativa en Latam.',prod:'M&A, DCM, ECM, fintech IB, FX'},
+  'Grao Direto':{ind:'AgTech / Commodities',desc:'Marketplace digital de granos y commodities agrícolas en Brasil. Conecta productores con compradores.',prod:'Trading de granos, marketplace agrícola, logística'},
+  'Mastercard':{ind:'Payments / Financial Services',desc:'Red global de pagos. Infraestructura para bancos, fintechs y comercios. Patrocinador Platinum del LTF.',prod:'Procesamiento de pagos, ciberseguridad, tokenización, analytics'},
+  'BFF':{ind:'Investment Banking Boutique',desc:'Boutique de banca de inversión para empresas de tecnología y growth en Latam.',prod:'M&A advisory, fundraising, valoraciones tech'},
+  'KIO':{ind:'Datacenter / Cloud',desc:'Proveedor de datacenter y servicios cloud en México y Latam. Infraestructura crítica para empresas.',prod:'Colocation, cloud, conectividad, disaster recovery'},
+  'Canary':{ind:'Venture Capital / Seed',desc:'Fondo de VC seed para startups en Brasil. Muy activo en early-stage con decisiones rápidas.',prod:'Seed investments Brasil, 200+ inversiones'},
+  'Nubank':{ind:'Neobank / Fintech Global',desc:'El banco digital más grande del mundo por clientes (~100M). Opera en Brasil, México y Colombia. Competencia directa de Lulo.',prod:'Cuenta digital, tarjeta de crédito, crédito, seguros, Nu inversiones'},
+  'F360':{ind:'Fintech / Gestión de Franquicias',desc:'Plataforma de gestión financiera para franquicias y redes de negocios en Brasil.',prod:'Conciliación financiera, gestión de franquicias, automatización contable'},
+  'Conekta':{ind:'Payments / México',desc:'Plataforma de pagos para e-commerce en México. Procesamiento de tarjetas, OXXO y transferencias.',prod:'Payment gateway, checkout, antifraude, OXXO cash'},
+  'Clinicorp':{ind:'HealthTech / SaaS Médico',desc:'Software de gestión para clínicas de salud y odontología en Brasil y Latam.',prod:'Agenda médica, facturación, CRM de pacientes, telemedicina'},
+  'J.P. Morgan':{ind:'Banca de Inversión Global',desc:'El mayor banco del mundo por activos. División LatAm lidera en M&A, ECM y DCM para tecnología.',prod:'M&A, IPO, deuda, fintech banking, corporate finance'},
+  'Wellhub':{ind:'Wellness / HR Benefits',desc:'Plataforma de beneficios de bienestar corporativo (ex Gympass). Conecta empleados con gimnasios y apps de salud.',prod:'Gympass, acceso a 50,000+ gimnasios, apps de bienestar'},
+  'Ben & Frank':{ind:'E-commerce / Óptica DTC',desc:'DTC de anteojos y lentes en México y Latam. Online-first con precios accesibles.',prod:'Lentes graduados, anteojos, lentes de contacto, examen de vista'},
+  'Oracle':{ind:'Enterprise Software / Cloud',desc:'Empresa global de software empresarial y cloud. Patrocinador Platinum del LTF2026.',prod:'Oracle Cloud, ERP, base de datos, Java, NetSuite'},
+  'Uber':{ind:'Mobility / Delivery / Tech',desc:'Plataforma global de movilidad, delivery y logística. Federico Chester lidera desarrollo de negocio en Latam.',prod:'Uber Rides, Uber Eats, Uber Freight, Uber for Business'},
+  'BZCP':{ind:'Investment Banking Boutique',desc:'Boutique de banca de inversión especializada en tecnología y mercados de capital en Latam.',prod:'M&A, capital raising, advisory para tech companies'},
+  'Cisneros':{ind:'Media / Consumer / VC',desc:'Conglomerado familiar con presencia en media, entretenimiento y tecnología en Latam.',prod:'Televisión, digital media, real estate, VC arm'},
+  'Brightstar Capital Partners':{ind:'Private Equity',desc:'Fondo de PE fundado por Marcelo Claure (ex COO SoftBank). Telecomunicaciones, fintech y consumo en Americas.',prod:'Control investments, growth equity, portafolio operativo'},
+  'Cortex':{ind:'Revenue Intelligence / SaaS',desc:'Plataforma de inteligencia de ventas y revenue operations para empresas B2B en Brasil.',prod:'Sales intelligence, prospecting, account management'},
+  'Itaú BBA':{ind:'Banca de Inversión / Latam',desc:'Brazo de investment banking de Itaú Unibanco, el banco más grande de Latam. Activo en Colombia.',prod:'M&A, ECM, DCM, fintech financing, structured products'},
+  '2TM | Mercado Bitcoin':{ind:'Crypto / Blockchain / Exchange',desc:'Grupo dueño de Mercado Bitcoin, el exchange de criptomonedas más grande de Latam. Valuado en $2.2B.',prod:'Exchange crypto, trading, custodia, stablecoins, tokenización'},
+  'Mercado Libre':{ind:'E-commerce / Fintech',desc:'El marketplace y ecosistema fintech más grande de Latam. MercadoPago y MercadoCredito compiten con Lulo en Colombia.',prod:'Marketplace, MercadoPago, MercadoCredito, MercadoEnvíos'},
+  'Itaú Unibanco':{ind:'Banca / Finanzas',desc:'El banco privado más grande de Latam por activos. Opera en 18 países incluyendo Colombia.',prod:'Banca retail, corporate, Iti (neobank), seguros, asset management'},
+  'Ebanx':{ind:'Payments / Latam',desc:'Plataforma de pagos que permite a merchants globales aceptar métodos locales en Brasil y Latam.',prod:'Payment processing, métodos locales Brasil, checkout, gaming payments'},
+  'Crown':{ind:'Fintech / B2B Payments',desc:'Solución de pagos B2B y treasury management para empresas en Latam.',prod:'Treasury, FX, pagos internacionales B2B'},
+  'Hugging Face':{ind:'AI / Open Source',desc:'La plataforma de AI open-source más importante del mundo. Repositorio de modelos, datasets y herramientas ML.',prod:'Model Hub (500k+ modelos), Spaces, Inference API, Transformers library'},
+  'Betterfly':{ind:'Insurance / Wellness Tech',desc:'Plataforma de beneficios y seguros que recompensa hábitos saludables. Opera en Latam.',prod:'Seguro de vida, beneficios corporativos, wellness rewards'},
+  'CondoConta':{ind:'Fintech / PropTech',desc:'Banco digital para condominios y administradores de propiedad en Brasil.',prod:'Cuenta digital para condominios, gestión de pagos, cobranza'},
+  'BNY':{ind:'Financial Services / Custody',desc:'Bank of New York Mellon — custodio y servicios de inversión. ADRs y depositary receipts. Patrocinador del LTF.',prod:'Depositary receipts (ADRs), custodia, fund services, treasury'},
+  'Intercorp':{ind:'Conglomerado / Perú',desc:'Conglomerado peruano con negocios en banca (Interbank), retail, seguros y educación.',prod:'Interbank, InRetail, Interseguro, educación'},
+  'Cooley':{ind:'Legal / Tech & VC',desc:'Firma de abogados global especializada en startups, VC, tecnología y mercados de capital.',prod:'VC legal, M&A, IPO, fund formation'},
+  'Endeavor':{ind:'Entrepreneurship / VC',desc:'Red global de apoyo a emprendedores de alto impacto. Endeavor Catalyst co-invierte con VCs líderes en Latam.',prod:'Mentoría, red de contactos, Endeavor Catalyst fund'},
+  'GOintegro':{ind:'HR Tech / Beneficios',desc:'Plataforma de beneficios y engagement para empleados en Latam.',prod:'Beneficios flexibles, reconocimiento, comunicación interna'},
+  'SimpliRoute':{ind:'Logistics Tech / SaaS',desc:'Plataforma de optimización de rutas de última milla para empresas de delivery en Latam.',prod:'Optimización de rutas, gestión de flota, tracking'},
+  'Citi':{ind:'Banca Global',desc:'Banco global con fuerte presencia en fintech y mercados de capital en Latam. Patrocinador Platinum.',prod:'Banca corporativa, FX, mercados de capital, fintech partnerships'},
+  'Morgan Stanley':{ind:'Banca de Inversión',desc:'Banco de inversión global. División Latam Tech activa en IPOs y M&A de tecnología.',prod:'IPO, M&A, equity research, wealth management'},
+  'Bradesco':{ind:'Banca / Brasil',desc:'Uno de los mayores bancos privados de Brasil. Bradesco BBI es el brazo de inversión. Patrocinador Platinum.',prod:'Banca retail, corporate, Bradesco BBI (IB), Next (neobank)'},
+  'BCI':{ind:'Banca / Chile',desc:'Banco de Crédito e Inversiones — uno de los principales bancos privados de Chile.',prod:'Banca retail, corporativa, segmentos premium, digital banking'},
+  'Despegar':{ind:'Travel Tech / OTA',desc:'OTA (agencia de viajes online) líder en Latam. Vuelos, hoteles, paquetes y experiencias.',prod:'Vuelos, hoteles, paquetes, cruceros, seguros de viaje'},
+  'Toku':{ind:'Payments / B2B',desc:'Plataforma de pagos B2B y gestión de tesorería para empresas en Latam.',prod:'Pagos cross-border, gestión de cuentas, treasury automation'},
+  'Stark Bank':{ind:'Neobank B2B / API Banking',desc:'Banco digital API-first para empresas en Brasil. Automatiza operaciones financieras. Patrocinador Platinum.',prod:'API banking, pagos, boletos, Pix, crédito empresarial'},
+  'Petlove':{ind:'PetTech / E-commerce',desc:'Plataforma líder de e-commerce y servicios para mascotas en Brasil.',prod:'Tienda online, suscripción, seguro para mascotas, telemedicina vet'},
+  'Wehandle':{ind:'Logistics / E-commerce',desc:'Plataforma de gestión logística y operaciones para e-commerce en Brasil.',prod:'WMS, fulfillment, gestión de pedidos, logística inversa'},
+  'BRITech Global':{ind:'Wealth Tech / SaaS',desc:'Plataforma de tecnología para gestoras de patrimonio e inversiones en Brasil.',prod:'Portfolio management, CRM para gestoras, reportes'},
+  '123Seguro':{ind:'InsurTech',desc:'Marketplace de seguros digital en Latam. Comparación y contratación online.',prod:'Comparador de seguros, auto, vida, hogar, viaje'},
+  'Fudo':{ind:'Restaurant Tech',desc:'Sistema de gestión para restaurantes en Latam (POS + delivery + gestión).',prod:'POS, delivery integrado, gestión de mesas, inventario'},
+  'Omnibees':{ind:'HotelTech / Distribution',desc:'Plataforma de distribución hotelera y revenue management para hoteles en Latam.',prod:'Channel manager, motor de reservas, revenue management'},
+  'Adyen':{ind:'Payments / Enterprise Global',desc:'Plataforma de pagos global para grandes empresas. Procesa para Uber, Spotify, McDonalds. Latam: Thais Fischberg.',prod:'Unified commerce, pagos online/offline, analytics, risk management'},
+  'Kueski':{ind:'BNPL / Fintech / México',desc:'Plataforma de crédito al consumo y BNPL en México. Kueski Pay: compra ahora, paga después.',prod:'BNPL, crédito personal, Kueski Pay para e-commerce'},
+  'Creditas':{ind:'Fintech / Crédito con Garantía',desc:'Plataforma de crédito con garantía (auto, inmueble) en Brasil. Unicornio ~$4.8B.',prod:'Crédito con garantía, refinanciamiento auto, crédito personal'},
+  'Mudafy':{ind:'PropTech / Real Estate',desc:'Plataforma inmobiliaria digital para compra y venta en México y Argentina.',prod:'Búsqueda de propiedades, asesoría, financiamiento hipotecario'},
+  'Celcoin':{ind:'Banking as a Service',desc:'Plataforma de BaaS para fintechs y empresas en Brasil.',prod:'BaaS, Pix, boletos, contas digitais, open finance APIs'},
+  'SoftBank':{ind:'Venture Capital / PE Global',desc:'SoftBank Latin America Fund — uno de los mayores inversores en tech de la región. $8B AUM.',prod:'Cheques $50M-$500M, portafolio: Rappi, Kavak, Creditas, Loft'},
+  'Rivio':{ind:'Fintech / Open Finance',desc:'Plataforma de open finance para compartir y analizar datos financieros de empresas en Brasil.',prod:'Open finance, análisis financiero, conectividad bancaria'},
+  'Prex':{ind:'Fintech / Wallet',desc:'Billetera digital y tarjeta prepaga en Uruguay, Paraguay y Argentina.',prod:'Tarjeta prepaga, billetera digital, pagos QR, transferencias'},
+  'LuloBank':{ind:'Neobank / Colombia',desc:'Banco digital líder en Colombia. Cuenta de ahorros, tarjeta débito, transferencias.',prod:'Cuenta digital, tarjeta débito, transferencias, rentabilidad'},
+  'Seedz':{ind:'AgTech / Loyalty',desc:'Plataforma de loyalty y beneficios para el agronegocio en Brasil.',prod:'Programa de puntos agro, marketplace de insumos, beneficios'},
+  'Stori Card':{ind:'Fintech / Crédito / México',desc:'Tarjeta de crédito para segmentos desbancarizados en México. Onboarding 100% digital.',prod:'Tarjeta de crédito accesible, crédito para nuevos usuarios'},
+  'Solides':{ind:'HR Tech / Talento',desc:'Plataforma de gestión de talento y cultura organizacional para empresas en Brasil.',prod:'Gestión de desempeño, cultura, reclutamiento, succession planning'},
+  'InvGate':{ind:'IT Service Management',desc:'Plataforma de ITSM y gestión de activos IT para empresas en Latam.',prod:'Help desk, service desk, asset management, ITIL'},
+  'Apatat':{ind:'Fintech / Colombia',desc:'Startup fintech fundada en Colombia enfocada en finanzas personales y acceso a servicios financieros.',prod:'Finanzas personales, acceso a crédito Colombia'},
+  'Comp':{ind:'CompTech / HR',desc:'Plataforma de gestión de compensaciones y beneficios para empresas en Latam.',prod:'Análisis de compensaciones, bandas salariales, equity management'},
+  'Clara':{ind:'Fintech / Tarjetas B2B',desc:'Tarjeta corporativa y gestión de gastos empresariales para empresas en México y Latam.',prod:'Tarjeta corporativa, gestión de gastos, reportes, crédito B2B'},
+  'AgendaPro':{ind:'SaaS / Salones y Bienestar',desc:'Plataforma de gestión para salones de belleza, spas y negocios de bienestar en Latam.',prod:'Agenda online, POS, gestión de clientes, marketing'},
+  'VTEX':{ind:'E-commerce SaaS / NYSE',desc:'Plataforma de e-commerce y marketplace para grandes retailers en Latam y globalmente. Cotiza NYSE.',prod:'Commerce platform, OMS, marketplace, live shopping'},
+  'Felix Pago':{ind:'Fintech / Remesas WhatsApp',desc:'Plataforma de remesas y pagos internacionales via WhatsApp para migrantes en EEUU hacia México.',prod:'Remesas por WhatsApp, transferencias internacionales'},
+  'Simetrik':{ind:'Fintech / Reconciliación',desc:'Plataforma de reconciliación financiera automatizada para empresas. Nació en Bogotá, Colombia.',prod:'Reconciliación contable, cierre financiero, auditoría automatizada'},
+  'Frubana':{ind:'B2B Marketplace / FoodTech',desc:'Marketplace B2B que conecta restaurantes con proveedores en Colombia, México y Brasil.',prod:'Marketplace de insumos, logística, crédito para restaurantes'},
+  'Cathay Innovation':{ind:'Corporate VC Global',desc:'Fondo de venture capital corporativo global con foco en innovación disruptiva y Latam.',prod:'Corporate VC, open innovation, 100+ startups globales'},
+  'Stellar':{ind:'Blockchain / Payments',desc:'Red blockchain para pagos globales y transferencias. Foco en inclusión financiera.',prod:'Protocolo Stellar, USDC on Stellar, remesas, tokenización'},
+  'CI&T':{ind:'Digital Transformation / Tech Services',desc:'Empresa de servicios de transformación digital e ingeniería de software. Cotiza NYSE.',prod:'Software engineering, AI/ML, cloud, product design'},
+  'BBVA':{ind:'Banca Global / Fintech',desc:'Banco global con fuerte presencia en Colombia, México y España. BBVA Spark es el brazo fintech. Patrocinador.',prod:'Banca digital, BBVA Spark (fintech arm), Open API, CIB'},
+  'Jusbrasil':{ind:'LegalTech',desc:'Mayor plataforma legal de Brasil. Acceso a jurisprudencia y procesos judiciales.',prod:'Búsqueda jurídica, monitoreo de procesos, documentos legales'},
+  'Logcomex':{ind:'Trade Intelligence / Logistics',desc:'Plataforma de inteligencia de comercio exterior y logística para Brasil y Latam.',prod:'Datos de importación/exportación, inteligencia aduanera, supply chain'},
+  'Certta':{ind:'Compliance Tech',desc:'Plataforma de gestión de compliance y riesgo para empresas reguladas en Latam.',prod:'Gestión de compliance, due diligence, KYC empresarial'},
+  'Prosus':{ind:'Technology Investments',desc:'División de inversiones tecnológicas de Naspers. Uno de los mayores inversores en tech de emerging markets.',prod:'Inversiones en OLX, iFood, Swiggy, Stack Overflow'},
+  'DOCK':{ind:'Banking as a Service',desc:'Plataforma de BaaS e infraestructura financiera para fintechs y bancos en Latam.',prod:'Card processing, contas digitais, crédito as a service, BaaS'},
+  'Zeal':{ind:'Fintech / Embedded Payroll',desc:'Plataforma de nómina embebida (embedded payroll) para empresas de software en EEUU.',prod:'Embedded payroll API, tax compliance, white-label payroll'},
+  'Group Liberty':{ind:'Insurance / Financial Services',desc:'Grupo asegurador global con operaciones en Latam. Liberty Seguros.',prod:'Seguros de auto, vida, empresa, salud en Latam'},
+  'Kaszek Ventures':{ind:'Venture Capital / Latam',desc:'El mayor fondo de VC de Latam (~$3.5B AUM). Portafolio: Nubank, Kavak, Creditas, QuintoAndar.',prod:'Early y growth stage en Latam, 80+ empresas en portafolio'},
+  'Xepelin':{ind:'Fintech B2B / Crédito',desc:'Plataforma de capital de trabajo y gestión financiera para empresas en Chile y México.',prod:'Factoring, crédito B2B, cuentas por pagar, gestión financiera'},
+  'Barte':{ind:'Fintech / B2B Payments',desc:'Plataforma de pagos B2B para empresas en Brasil. Automatización de cobros y pagos.',prod:'Pagos B2B, boletos, Pix, automação de cobranças'},
+  'OpenAI':{ind:'AI / Foundation Models',desc:'Empresa líder en inteligencia artificial. Creadora de ChatGPT y GPT-4. Emma Lalley lidera expansión global.',prod:'ChatGPT, GPT-4o, API, Assistants, DALL-E, Sora'},
+  'Meta':{ind:'Social Media / AI / WhatsApp',desc:'Empresa dueña de Facebook, Instagram y WhatsApp. Latam es región estratégica. VP Latam: Maren Lau.',prod:'WhatsApp Business API, Instagram Ads, Meta AI, Llama models'},
+  'LOGGI':{ind:'Logistics / Last Mile',desc:'Plataforma de logística y entrega de última milla líder en Brasil.',prod:'Entregas B2C, B2B, marketplace de logística, software de gestión'},
+  'Foley & Lardner LLP':{ind:'Legal / Tech & Finance',desc:'Firma legal global especializada en tecnología, startups y mercados de capital.',prod:'VC legal, M&A, IPO counsel, fund formation'},
+  'OLX Brazil':{ind:'Marketplace / Clasificados',desc:'Plataforma de clasificados online líder en Brasil para autos, inmuebles y consumo.',prod:'Marketplace de autos, inmuebles, electrónica, empleos'},
+  'Maya Capital':{ind:'Venture Capital',desc:'Fondo de VC liderado por Lara Lemann. Consumer tech y digital services en Latam.',prod:'Seed e early-stage en consumer tech Latam'},
+  'Stone':{ind:'Fintech / Payments / Brasil',desc:'Empresa de medios de pago y servicios financieros para pequeñas empresas en Brasil. Cotiza NASDAQ.',prod:'mPOS, pagos, crédito, gestión financiera para PMEs'},
+  'GeoPagos':{ind:'Fintech / Payments Infrastructure',desc:'Infraestructura de pagos para bancos y fintechs en Latam. Procesamiento de tarjetas.',prod:'Procesamiento de pagos, POS software, acquiring'},
+  'Omie':{ind:'ERP SaaS / Pymes',desc:'ERP en la nube para pequeñas y medianas empresas en Brasil.',prod:'ERP cloud, nota fiscal, financiero, CRM, integrações'},
+  'Evertec':{ind:'Payment Technology / Latam',desc:'Empresa de tecnología de pagos para Latam. Procesa para Bancolombia, Davivienda. Relación existente con Lulo.',prod:'Procesamiento de pagos, EvoPay, POS, switching, loyalty'},
+  'Kavak':{ind:'AutoTech / E-commerce',desc:'Marketplace de compra-venta de autos usados certificados en México, Brasil y Latam. Unicornio ~$8.7B.',prod:'Compra-venta autos usados, financiamiento, garantía'},
+  'XP Inc.':{ind:'Fintech / Wealth Management',desc:'Plataforma de inversiones y servicios financieros líder en Brasil. Cotiza NASDAQ.',prod:'Broker, wealth management, XP Investimentos, Rico, Clear'},
+  'CookUnity':{ind:'FoodTech / D2C',desc:'Servicio de entrega de comidas premium preparadas por chefs en EEUU.',prod:'Meal delivery, chef-prepared meals, suscripción semanal'},
+  'Leal':{ind:'Loyalty / Rewards / Colombia',desc:'Plataforma de loyalty y programas de puntos para comercios en Colombia.',prod:'Programa de puntos, cashback, beneficios para consumidores Colombia'},
+  'Atlantico':{ind:'Venture Capital',desc:'Fondo de VC en economía digital de Latam. Ana Martins es General Partner.',prod:'Early-stage Latam, portafolio: Nuvemshop, Pismo, Ebanx'},
+  'Yalo':{ind:'Conversational Commerce',desc:'Plataforma de comercio conversacional via WhatsApp para grandes empresas en Latam.',prod:'WhatsApp commerce, chatbots, conversational AI'},
+  'Tools for Humanity':{ind:'Web3 / Identity / World ID',desc:'Empresa detrás de Worldcoin/World ID. Identidad digital biométrica global (iris scan).',prod:'World ID, Worldcoin, prueba de humanidad, orb biométrico'},
+  'Runa':{ind:'HR Tech / Nómina',desc:'Plataforma de nómina y pagos para empleados en México.',prod:'Nómina digital, pagos de nómina, beneficios, earned wage access'},
+  'Habi':{ind:'PropTech / Colombia',desc:'Plataforma de compra-venta de vivienda usada en Colombia y México. iBuying y marketplace.',prod:'Compra directa de casas, marketplace inmobiliario, financiamiento'},
+  'Gupy':{ind:'HR Tech / Recruiting',desc:'Plataforma de reclutamiento y selección de talento líder en Brasil con AI.',prod:'ATS, reclutamento, admissão digital, treinamento'},
+  'Revelo':{ind:'HR Tech / Recruiting Tech',desc:'Plataforma de contratación de talento tech en Brasil y Latam.',prod:'Recruiting, job matching, talent marketplace, remote hiring'},
+  'EPAM NEORIS':{ind:'IT Services / Digital',desc:'Empresa de servicios de tecnología y transformación digital con presencia global y fuerte en Latam.',prod:'Software development, digital transformation, cloud, AI'},
+  'Globant':{ind:'Digital Transformation / NYSE',desc:'Empresa de tecnología y transformación digital cotizada en NYSE. Sede Argentina, presencia global.',prod:'Digital transformation, gaming, AI, cloud, data analytics'},
+  'Kovi':{ind:'Mobility / AutoTech',desc:'Plataforma de alquiler de autos para conductores de apps (Uber, 99) en Brasil.',prod:'Alquiler de vehículos para conductores, gestión de flota'},
+  'Pipo Saude':{ind:'HealthTech / HR Benefits',desc:'Plataforma de gestión de beneficios de salud para empresas en Brasil.',prod:'Gestión de planos de saúde, benefícios, comparación de planes'},
+  'Klar':{ind:'Neobank / México',desc:'Banco digital en México. Cuenta de ahorros y tarjeta de crédito. Competidor similar a Lulo.',prod:'Cuenta digital, tarjeta de crédito, inversiones, México'},
+  'BTG Pactual':{ind:'Investment Banking / Latam',desc:'Mayor banco de inversión de Latam. Activo en Colombia. Patrocinador Platinum del LTF.',prod:'M&A, ECM, DCM, asset management, wealth management'},
+  'Open Education':{ind:'EdTech / Online',desc:'Empresa de educación online con presencia en Latam y EEUU.',prod:'Cursos online, certificaciones, educación corporativa'},
+  'Wortise':{ind:'Mobile Advertising / AdTech',desc:'Plataforma de monetización y publicidad para apps móviles en Latam.',prod:'Ad mediation, monetización de apps, DSP/SSP'},
+  'Intelipost':{ind:'Logistics SaaS',desc:'Plataforma de gestión logística y cotización de flete para e-commerce en Brasil.',prod:'Gestión de flete, rastreo, logística reversa, cotización'},
+  'Marmi Asset Management':{ind:'Asset Management',desc:'Gestora de activos boutique con foco en inversiones en Latam.',prod:'Gestión de portafolio, inversiones alternativas'},
+  'Blackrock':{ind:'Asset Management Global',desc:'Mayor gestora de activos del mundo (~$10T AUM). Rosemberg lidera wealth & family capital en Latam.',prod:'ETFs iShares, gestión de activos, advisory, Latam expansion'},
+  'Bleeding Edge Technologies':{ind:'Deep Tech / Advisory',desc:'Consultoría y desarrollo en tecnologías emergentes (AI, blockchain, quantum).',prod:'AI consulting, blockchain, tech advisory'},
+  'Monato':{ind:'Fintech / Latam',desc:'Solución fintech para acceso a servicios financieros en mercados emergentes de Latam.',prod:'Pagos, transfers, inclusión financiera'},
+  '30N Ventures':{ind:'Venture Capital',desc:'Fondo de VC con foco en startups de tecnología en etapa temprana.',prod:'Pre-seed y seed investments'},
+  'Flash Beneficios':{ind:'HR Tech / Beneficios',desc:'Plataforma de beneficios corporativos flexibles en Brasil.',prod:'Tarjeta de beneficios, gestión flexible, integraciones RH'},
+  'Hashdex':{ind:'Crypto Asset Management',desc:'Gestora con ETFs de Bitcoin y criptomonedas en Brasil y globalmente.',prod:'ETF de Bitcoin, index funds crypto, gestión institucional'},
+  'Kuona':{ind:'Revenue Management / AI',desc:'Plataforma de revenue management y pricing dinámico con AI para retailers en Latam.',prod:'Pricing dinámico, revenue optimization, AI para retail'},
+  'RD Station':{ind:'Marketing Automation',desc:'Plataforma de marketing digital y automatización para empresas en Brasil y Latam.',prod:'Email marketing, CRM, automação, landing pages'},
+  'Segura':{ind:'Cybersecurity / Latam',desc:'Empresa de ciberseguridad construida para Latam. Marcus Scharra (fundador) modera el panel de ciber en LTF.',prod:'Ciberseguridad, gestión de identidades, protección de datos'},
+  'Nubimetrics':{ind:'E-commerce Analytics',desc:'Plataforma de inteligencia competitiva para vendedores en Mercado Libre y marketplaces.',prod:'Analytics de marketplaces, inteligencia competitiva, pricing'},
+  'Darwin AI':{ind:'AI / Ventas',desc:'Plataforma de AI para automatización de ventas y atención al cliente en Latam.',prod:'AI para ventas, WhatsApp automation, lead qualification'},
+  'Thiel Capital':{ind:'Family Office / VC',desc:'Family office de Peter Thiel. Inversiones de largo plazo en tecnología y fintech.',prod:'Inversiones directas, co-inversiones, capital paciente'},
+  'Ripio':{ind:'Crypto / Exchange',desc:'Exchange y plataforma de criptomonedas en Argentina, Brasil y México.',prod:'Exchange crypto, wallet, crédito cripto, staking'},
+  'IonQ':{ind:'Quantum Computing',desc:'Empresa líder en computación cuántica. Cotiza NYSE. Lidera quantum networking y seguridad.',prod:'Quantum computers, quantum networking, quantum security'},
+  'BigID':{ind:'Data Intelligence / Privacy',desc:'Plataforma de inteligencia de datos, privacidad y gobernanza para grandes empresas.',prod:'Descubrimiento de datos, privacidad, compliance LGPD/GDPR'},
+  'Advolve.ai':{ind:'Marketing / AI',desc:'Plataforma de automatización de publicidad digital con AI.',prod:'Ad automation, creative AI, performance marketing'},
+  'Stark Bank':{ind:'Neobank B2B / API Banking',desc:'Banco digital para empresas en Brasil con API-first. Patrocinador Platinum del LTF.',prod:'API banking, Pix, TED, boleto, crédito empresarial'},
+  'Swap':{ind:'BaaS / Fintech',desc:'Plataforma de Banking as a Service para empresas que quieren lanzar productos financieros en Brasil.',prod:'Card issuing, contas, BaaS, programa de beneficios'},
+  'VU':{ind:'Cybersecurity / Identity',desc:'Plataforma de ciberseguridad y gestión de identidad digital para empresas en Latam.',prod:'Autenticación, biometría, gestión de accesos, antifraude'},
+  'Fracttal':{ind:'Maintenance Management / SaaS',desc:'Software de mantenimiento y gestión de activos (CMMS) para empresas industriales en Latam.',prod:'CMMS, gestión de activos, mantenimiento preventivo'},
+  'Kaszek':{ind:'Venture Capital / Latam',desc:'Kaszek Ventures — el mayor VC de Latam (~$3.5B AUM). Nicolas Szekasy es co-managing partner.',prod:'Early y growth stage, 80+ empresas en portafolio'},
+  'Americas Society':{ind:'Policy / Business / Cultural',desc:'Organización que promueve relaciones entre EEUU y Latam en política, negocios y cultura.',prod:'Eventos, publicaciones, Council of the Americas'},
+  'Jeeves':{ind:'Fintech / Corporate Cards',desc:'Plataforma de tarjetas corporativas y gestión de gastos para startups en Latam. Opera en Colombia.',prod:'Tarjeta corporativa, gastos empresariales, crédito B2B'},
+  'Conta Simples':{ind:'Neobank B2B',desc:'Banco digital para empresas en Brasil. Cartões corporativos e gestão financeira.',prod:'Conta PJ, cartão corporativo, gestão de gastos, PIX'},
+  'Qualcomm':{ind:'Semiconductores / 5G',desc:'Empresa global de semiconductores y telecomunicaciones. Chips para smartphones y 5G.',prod:'Snapdragon, modems 5G, IoT chips, licencias de patentes'},
+  'Copa Airlines':{ind:'Aviación / Transporte',desc:'Aerolínea panameña hub de conectividad en Americas. Opera en toda Latam.',prod:'Vuelos nacionales e internacionales, ConnectMiles, cargo'},
+  'Contabilizei':{ind:'Accounting SaaS',desc:'Plataforma de contabilidad online para pequeñas empresas y freelancers en Brasil.',prod:'Contabilidade online, notas fiscais, folha de pagamento, IR'},
+  'Ascenty Data Centers':{ind:'Datacenter / Infrastructure',desc:'Proveedor líder de datacenters en Brasil y Latam.',prod:'Colocation, cloud, conectividad, datacenters neutros'},
+  'Bradesco BBI':{ind:'Investment Banking / Brasil',desc:'Brazo de banca de inversión de Bradesco. Activo en M&A y mercados de capital.',prod:'M&A, ECM, DCM, structured finance'},
+  'KPMG':{ind:'Auditoría / Consultoría',desc:'Una de las Big 4 consultoras globales. Auditoría, impuestos y consultoría. Patrocinador del LTF.',prod:'Audit, tax, advisory, deal advisory, technology consulting'},
+  'ComparaOnline':{ind:'InsurTech / Comparación',desc:'Plataforma de comparación de seguros y productos financieros en Chile y Colombia.',prod:'Comparador de seguros, créditos, préstamos online'},
+  'Nomad':{ind:'Neobank / Cross-border',desc:'Banco digital para brasileños con necesidades en USD y servicios internacionales.',prod:'Cuenta en USD, tarjeta global, inversiones internacionales'},
+  'Platzi':{ind:'EdTech / Online Education',desc:'Plataforma de educación online en español para tecnología, negocios y creatividad en Latam.',prod:'Cursos online, paths de carrera, Platzi Master, certificaciones'},
+  'Aleph':{ind:'Digital Advertising / Media',desc:'Empresa que representa a plataformas digitales globales (Meta, TikTok, Spotify) en mercados emergentes.',prod:'Representación publicitaria, digital media, ad sales'},
+  'Belvo':{ind:'Open Finance / APIs',desc:'APIs de open finance que conectan con bancos en Latam para acceder a datos financieros.',prod:'Banking APIs, datos de cuentas, transacciones, datos fiscales'},
+  'Goldman Sachs':{ind:'Banca de Inversión Global',desc:'Uno de los bancos de inversión más importantes del mundo. Activo en M&A y capital markets en Latam.',prod:'M&A advisory, IPO, debt capital markets, private equity'},
+  'Itaú Latam':{ind:'Banca / Latam',desc:'Chairman de Itaú en la región. El banco privado más grande de Latam.',prod:'Retail banking, corporate banking, wealth management'},
+  'Avila VC':{ind:'Venture Capital',desc:'Fondo de VC fundado por Patricia Wexler. Startups de tecnología en Latam.',prod:'Early-stage investments, fintech, SaaS Latam'},
+  'Quona Capital':{ind:'Impact VC / Fintech Inclusion',desc:'VC con foco en inclusión financiera en mercados emergentes. Colombia es core de su tesis.',prod:'Fintech inclusion, Colombia, Asia, África, 50+ inversiones'},
+  'Contalink':{ind:'Accounting SaaS / México',desc:'Plataforma de contabilidad y gestión fiscal para empresas en México.',prod:'Contabilidad, impuestos SAT, facturación electrónica'},
+  'Trafilea':{ind:'D2C / E-commerce',desc:'Empresa de e-commerce direct-to-consumer de moda y lifestyle. Sede Uruguay.',prod:'Marcas DTC, growth marketing, e-commerce operations'},
+  'Equinix':{ind:'Datacenter / Colocation Global',desc:'Líder global en datacenters interconectados. Eduardo Zago lidera Latam.',prod:'Colocation, interconnection, cloud on-ramps, IBX datacenters'},
+  'Alephee':{ind:'Retail Tech / E-commerce',desc:'Plataforma de gestión de contenido de producto para marcas en Latam.',prod:'PIM, catálogos digitales, distribución a marketplaces'},
+  'Botmaker':{ind:'Conversational AI / Chatbots',desc:'Plataforma de chatbots e IA conversacional para empresas en Latam. Integración WhatsApp.',prod:'Chatbots, WhatsApp Business API, automatización de atención'},
+  'Kushki':{ind:'Payments Infrastructure / Latam',desc:'Infraestructura de pagos para empresas en Colombia, México, Ecuador y Perú. Backed by SoftBank.',prod:'Payment gateway, acquiring, pagos recurrentes, API de pagos'},
+  'QED Investors':{ind:'Venture Capital / Fintech Global',desc:'El VC fintech más especializado del mundo (~$4B AUM). Portfolio: Nubank, Creditas, dLocal, Uala.',prod:'Fintech-only fund, 200+ fintechs globales'},
+  'Pomelo':{ind:'Card Issuing / Fintech Infra',desc:'Infraestructura de tarjetas como servicio para fintechs en Latam. Emite tarjetas sin ser banco.',prod:'Card issuing, plataforma de tarjetas, prepago, débito, crédito'},
+  'Complif':{ind:'Compliance Tech / Fintech',desc:'Compliance automatizado para fintechs y empresas reguladas en Latam. Salió de Y Combinator.',prod:'KYC automation, AML, compliance workflows, due diligence'},
+  'Bankingly':{ind:'Banking SaaS',desc:'Plataforma de banca digital para cooperativas y bancos pequeños en Latam.',prod:'Mobile banking, internet banking, onboarding digital'},
+  'Accountfy & Tagor':{ind:'Finance SaaS',desc:'Plataforma de consolidación financiera y reporte para grupos empresariales en Brasil.',prod:'Consolidación financiera, planificación, análisis de datos'},
+  'Yuno':{ind:'Payment Orchestration',desc:'Orquestación de pagos que simplifica integraciones con múltiples PSPs. Nació en Colombia.',prod:'Payment orchestration, integración de PSPs, smart routing'},
+  'Workana':{ind:'Freelance Marketplace',desc:'Mayor marketplace de freelancers en Latam. Conecta empresas con talento independiente.',prod:'Freelance marketplace, proyectos, talento remoto'},
+  'Blip':{ind:'Conversational AI / WhatsApp',desc:'Plataforma de comunicación conversacional y chatbots. Líder en Brasil para grandes empresas.',prod:'WhatsApp Business API, chatbots, atención al cliente, NLP'},
+  'COPPEL':{ind:'Retail / Financial Services',desc:'Cadena de retail y servicios financieros en México para segmentos populares.',prod:'Retail, crédito al consumo, Banca Coppel, seguros'},
+  'Birdie':{ind:'Customer Intelligence / SaaS',desc:'Plataforma de inteligencia de cliente para empresas de consumo en Brasil.',prod:'Customer analytics, NPS, reviews analysis, insights'},
+  'Lastro':{ind:'Fintech / Real Estate',desc:'Plataforma de financiamiento y tokenización de activos inmobiliarios en Brasil.',prod:'Tokenización inmobiliaria, CRI/CRA, inversiones inmobiliarias'},
+  'Adsmovil':{ind:'Mobile Advertising',desc:'Empresa de publicidad móvil y digital para Latam.',prod:'Mobile advertising, programmatic, data targeting Latam'},
+  'Bigbox':{ind:'Gifting / Experiences',desc:'Plataforma de regalos de experiencias en Argentina y Latam.',prod:'Gift boxes, experiencias, restaurantes, viajes, spa'},
+  'iFood':{ind:'Food Delivery / Super App',desc:'Super app de delivery de comida líder en Brasil y Colombia. Backed by Prosus.',prod:'Delivery de comida, mercado, farmacia, logística'},
+  'Loft':{ind:'PropTech / Real Estate',desc:'Plataforma de compra-venta de propiedades e iBuying en Brasil y México.',prod:'iBuying, marketplace inmobiliario, hipotecas, reformas'},
+  'Wollef':{ind:'Venture Capital',desc:'Fondo de VC enfocado en startups de impacto y tecnología en Latam.',prod:'Early-stage investments, impact tech Latam'},
+  'Netlex':{ind:'Legal Tech / Contratos',desc:'Plataforma de gestión de contratos y operaciones legales para empresas en Brasil.',prod:'Contract management, CLM, automatización de contratos'},
+  'Bemobi':{ind:'Telecom / Digital Services',desc:'Servicios digitales para operadoras de telefonía en mercados emergentes.',prod:'Servicios de valor añadido telco, digital content, mobile commerce'},
+  'Glim':{ind:'AI / Creative Tech',desc:'Plataforma de generación de video e imágenes con AI para creadores de contenido.',prod:'AI video generation, creative tools, content creation'},
+  'Shopper':{ind:'Grocery Delivery',desc:'Plataforma de supermercado online y delivery en Brasil.',prod:'Grocery delivery, supermercado online, suscripción'},
+  'RecargaPay':{ind:'Fintech / Super App',desc:'Super app de pagos y servicios financieros en Brasil. Recarga de celular, pagos y más.',prod:'Recarga celular, pagos, crédito, billetera digital'},
+  'Hashdex':{ind:'Crypto ETF',desc:'Gestora de ETFs de criptomonedas en Brasil y globalmente.',prod:'ETF Bitcoin, ETF crypto, gestión institucional de crypto'},
+  'Open Co':{ind:'Fintech / Crédito',desc:'Plataforma de crédito personal y refinanciamiento en Brasil.',prod:'Crédito personal, refinanciamiento de deuda'},
+  'Nuqlea':{ind:'Construction Tech / B2B',desc:'Marketplace B2B para materiales de construcción en Latam.',prod:'Marketplace construcción, gestión de compras, financiamiento'},
+  'DoorDash':{ind:'Food Delivery / Logistics',desc:'Plataforma líder de delivery en EEUU. David Richter lidera corporate development.',prod:'Food delivery, DashPass, Drive (B2B logistics), marketplace'},
+  'LAVCA':{ind:'VC Association / Latam',desc:'Asociación de VC e inversión en private equity en Latam.',prod:'Research, networking, advocacy para inversores en Latam'},
+  'Union Bravo':{ind:'Venture Capital',desc:'Fondo de VC con foco en startups de México y Latam.',prod:'Early-stage investments, consumer tech, SaaS'},
+};
+
+let ST={};
+const SK_LOCAL='ltf2026_v6';
+const SK_LOCAL5='ltf2026_v5';
+const CLOUD_KEY='ltf2026_state_v1';
+
+function showSyncStatus(msg,color){
+  const el=document.getElementById('sync-status');
+  if(el){el.textContent=msg;el.style.color=color||'var(--text3)';}
+}
+function ensureGuests(){
+  GUESTS.forEach(g=>{
+    if(!ST[g.id]){
+      const a=AUTO[g.first+' '+g.last]||{};
+      ST[g.id]={marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:''};
+    }
+    if(!ST[g.id].tracks){ST[g.id].tracks=ST[g.id].track?[ST[g.id].track]:[];delete ST[g.id].track;}
+  });
+}
+function getLocalData(){
+  try{
+    const s6=localStorage.getItem(SK_LOCAL);if(s6)return JSON.parse(s6);
+    const s5=localStorage.getItem(SK_LOCAL5);
+    if(s5){const old=JSON.parse(s5);const m={};Object.keys(old).forEach(k=>{const r=old[k];m[k]={...r,tracks:r.track?[r.track]:[]};delete m[k].track;});return m;}
+  }catch(e){}return null;
+}
+async function loadState(){
+  showSyncStatus('Cargando...','var(--orange)');
+  let loaded=false;
+  try{
+    const result=await window.storage.get(CLOUD_KEY,true);
+    if(result&&result.value){ST=JSON.parse(result.value);loaded=true;showSyncStatus('Sincronizado ✓','var(--accent)');}
+  }catch(e){}
+  if(!loaded){
+    const local=getLocalData();
+    if(local){ST=local;showSyncStatus('Subiendo datos locales...','var(--orange)');await save();}
+    else showSyncStatus('Listo','var(--accent)');
+  }
+  ensureGuests();renderStats();renderList();
+}
+async function save(){
+  try{
+    await window.storage.set(CLOUD_KEY,JSON.stringify(ST),true);
+    try{localStorage.setItem(SK_LOCAL,JSON.stringify(ST));}catch(e){}
+    showSyncStatus('Guardado ✓','var(--accent)');
+  }catch(e){
+    try{localStorage.setItem(SK_LOCAL,JSON.stringify(ST));}catch(e2){}
+    showSyncStatus('Solo local','var(--orange)');
+  }
+}
+
+
+let onlyM=false,onlyB=false,activeId=null;
+
+function doLogin(){
+  const u=document.getElementById('li-user').value.trim().toLowerCase();
+  const p=document.getElementById('li-pass').value;
+  if(USERS[u]===p){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    loadState();
+  } else {
+    document.getElementById('login-err').textContent='Usuario o contraseña incorrectos';
+    setTimeout(()=>document.getElementById('login-err').textContent='',2500);
+  }
+}
+function doLogout(){document.getElementById('app').style.display='none';document.getElementById('login-screen').style.display='flex';}
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');el.classList.add('on');
+  if(id==='dashboard')renderDash();
+}
+function gn(g){return g.first+' '+g.last;}
+
+function renderStats(){
+  const v=Object.values(ST);
+  const m=v.filter(x=>x.marked).length,b=v.filter(x=>x.benji).length;
+  const f=v.filter(x=>x.tracks&&x.tracks.includes('fondeo')).length;
+  const ct=v.filter(x=>x.status==='contactado').length,cf=v.filter(x=>x.status==='confirmado').length;
+  document.getElementById('nav-marked').textContent=m;
+  document.getElementById('nav-benji').textContent=b;
+  document.getElementById('nav-fondeo').textContent=f;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-card hi"><div class="stat-n">${m}</div><div class="stat-l">Marcados</div></div>
+    <div class="stat-card"><div class="stat-n">${b}</div><div class="stat-l">Para Benji</div></div>
+    <div class="stat-card hi2"><div class="stat-n">${f}</div><div class="stat-l">Fondeo inst.</div></div>
+    <div class="stat-card hi3"><div class="stat-n">${ct}</div><div class="stat-l">Contactados</div></div>
+    <div class="stat-card"><div class="stat-n">${cf}</div><div class="stat-l">Confirmados</div></div>
+    <div class="stat-card"><div class="stat-n">370</div><div class="stat-l">Total invitados</div></div>`;
+}
+function toggleMarked(){onlyM=!onlyM;document.getElementById('btn-marked').classList.toggle('on',onlyM);renderList();}
+function toggleBenji(){onlyB=!onlyB;document.getElementById('btn-benji').classList.toggle('on',onlyB);renderList();}
+
+function renderList(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const ft=document.getElementById('f-track').value;
+  const fs=document.getElementById('f-status').value;
+  const seen=new Set();
+  const gs=GUESTS.filter(g=>{
+    const k=g.first+'|'+g.last+'|'+g.company;if(seen.has(k))return false;seen.add(k);
+    const s=ST[g.id];
+    const trks=s.tracks||[];
+    return(!q||gn(g).toLowerCase().includes(q)||g.company.toLowerCase().includes(q)||g.title.toLowerCase().includes(q))
+      &&(!ft||trks.includes(ft))&&(!fs||s.status===fs)&&(!onlyM||s.marked)&&(!onlyB||s.benji);
+  });
+  const body=document.getElementById('list-body');
+  if(!gs.length){body.innerHTML='<div class="empty-state">Sin resultados</div>';return;}
+  body.innerHTML=gs.map(g=>{
+    const s=ST[g.id];
+    const trks=s.tracks||[];
+    const badgeHtml=trks.length
+      ? trks.map(t=>{const tk=TRACKS[t]||TRACKS[''];return `<span class="badge ${tk.cls}" style="margin-right:2px">${tk.label}</span>`;}).join('')
+      : '<span style="font-size:10px;color:var(--text3)">—</span>';
+    const co=CO_INFO[g.company];
+    const ttHtml=co?`<div class="tt"><div class="tt-industry">${co.ind}</div><div class="tt-desc">${co.desc}</div><div class="tt-products"><b>Productos clave:</b> ${co.prod}</div></div>`:'';
+    const isActive=activeId===g.id;
+    return `<div class="t-row${isActive?' t-row-active':''}" onclick="openSP(${g.id})">
+      <div><input type="checkbox" class="chk" ${s.marked?'checked':''} onclick="chkClick(event,${g.id})"></div>
+      <div class="name-cell"><div class="t-name">${gn(g)}</div><div class="t-co">${g.company}</div>${ttHtml}</div>
+      <div class="t-track" style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">${badgeHtml}</div>
+      <div>${s.benji?'<span class="badge b-red">Presentar</span>':'<span style="font-size:10px;color:var(--text3)">—</span>'}</div>
+      <div><span class="badge ${STATUS_COLORS[s.status]}">${STATUS_LABELS[s.status]}</span></div>
+      <div><button class="act-btn" onclick="event.stopPropagation();openSP(${g.id})">Ver →</button></div>
+      <div class="note-cell"><div class="note-cell-text">${s.note||''}</div></div>
+    </div>`;
+  }).join('');
+  renderStats();
+}
+function chkClick(e,id){e.stopPropagation();ST[id].marked=e.target.checked;if(!e.target.checked){ST[id].tracks=[];ST[id].benji=false;}save();renderStats();}
+
+function openSP(id){
+  const g=GUESTS.find(x=>x.id===id);if(!g)return;
+  const s=ST[id];const fn=gn(g);const res=RESEARCH[fn];const co=CO_INFO[g.company];
+  const trks=s.tracks||[];
+  activeId=id;
+  document.getElementById('contacts-layout').classList.add('panel-open');
+  const panel=document.getElementById('side-panel');
+  panel.style.display='block';
+
+  // Build track checkboxes — max 2 selectable
+  const trackCbs=Object.entries(TRACKS).filter(([k])=>k!=='').map(([k,v])=>{
+    const checked=trks.includes(k);
+    return `<label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;padding:3px 0">
+      <input type="checkbox" class="chk" ${checked?'checked':''} onchange="toggleTrack(${id},'${k}',this.checked)">
+      <span class="badge ${v.cls}" style="pointer-events:none">${v.label}</span>
+    </label>`;
+  }).join('');
+
+  const coHtml=co?`<div class="sp-co-card"><div class="sp-co-industry">${co.ind}</div><div class="sp-co-desc">${co.desc}</div><div class="sp-co-products"><b>Productos:</b> ${co.prod}</div></div>`:'';
+  panel.innerHTML=`
+  <div class="sp-header">
+    <button class="sp-close" onclick="closeSP()">✕</button>
+    <div class="sp-name">${fn}</div>
+    <div class="sp-title">${g.title} · ${g.company}</div>
+  </div>
+  <div class="sp-body">
+    ${coHtml}
+    <div class="sp-fields">
+      <div class="sp-field-full">
+        <div class="sp-label">Tracks <span style="font-weight:400;color:var(--text3)">(máx. 2)</span></div>
+        <div id="track-cbs-${id}" style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px">${trackCbs}</div>
+        <div id="track-warn-${id}" style="font-size:11px;color:var(--orange);margin-top:4px;display:none">Máximo 2 tracks por contacto.</div>
+      </div>
+      <div><div class="sp-label">Estado</div>
+        <select class="sp-sel" onchange="setF(${id},'status',this.value)">
+          <option value="pendiente" ${s.status==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="contactado" ${s.status==='contactado'?'selected':''}>Contactado</option>
+          <option value="confirmado" ${s.status==='confirmado'?'selected':''}>Confirmado</option>
+        </select>
+      </div>
+      <div><div class="sp-label">Para Benji</div>
+        <div class="benji-row" style="margin-top:9px">
+          <input type="checkbox" class="chk" id="sbc-${id}" ${s.benji?'checked':''} onchange="setF(${id},'benji',this.checked)">
+          <label for="sbc-${id}">Presentar a Benji</label>
+        </div>
+      </div>
+    </div>
+    <div class="sp-tabs">
+      <button class="sptab on" onclick="swSP(event,'research')">Research</button>
+      <button class="sptab" onclick="swSP(event,'mensaje')">Mensaje</button>
+      <button class="sptab" onclick="swSP(event,'notas')">Notas</button>
+    </div>
+    <div class="spsec on" id="sp-research">
+      ${res?`<div class="res-box"><div class="res-label">Inversores / Capital</div><div class="res-val">${res.inv}</div></div>
+      <div class="res-box"><div class="res-label">Alianzas clave</div><div class="res-val">${res.ali}</div></div>
+      <div class="res-box"><div class="res-label">Contexto para Lulo</div><div class="res-val">${res.ctx}</div></div>`
+      :`<div class="res-box"><div class="res-val" style="color:var(--text3)">Research no cargado aún para este contacto.</div></div>`}
+      <div class="action-row" style="margin-top:10px">
+        <button class="action-btn primary" onclick="researchAI('${fn.replace(/'/g,"\\'")}','${g.company.replace(/'/g,"\\'")}')">Research con IA ↗</button>
+      </div>
+    </div>
+    <div class="spsec" id="sp-mensaje">
+      <div class="msg-btns">
+        <button class="msg-btn on" id="smb-inf" onclick="loadSPMsg(${id},'informal',this)">WhatsApp</button>
+        <button class="msg-btn" id="smb-for" onclick="loadSPMsg(${id},'formal',this)">Email</button>
+      </div>
+      <textarea class="msg-ta" id="sp-mta-${id}"></textarea>
+      <div class="action-row">
+        <button class="action-btn primary" onclick="msgAI('${fn.replace(/'/g,"\\'")}','${g.company.replace(/'/g,"\\'")}','sp-mta-${id}')">Personalizar con IA ↗</button>
+        <button class="action-btn" onclick="copySPMsg(${id})">Copiar</button>
+        <span id="sp-cp-${id}" class="copy-ok">¡Copiado!</span>
+      </div>
+    </div>
+    <div class="spsec" id="sp-notas">
+      <input type="text" class="note-inp" id="sp-nt-${id}" placeholder="Notas sobre ${fn}..." value="${(s.note||'').replace(/"/g,'&quot;')}" oninput="setF(${id},'note',this.value)">
+      <div class="note-hint">Se guarda automáticamente.</div>
+    </div>
+  </div>`;
+  loadSPMsg(id,'informal',panel.querySelector('#smb-inf'));
+}
+
+function swSP(e,tab){
+  document.querySelectorAll('.sptab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.spsec').forEach(s=>s.classList.remove('on'));
+  e.target.classList.add('on');document.getElementById('sp-'+tab).classList.add('on');
+}
+function closeSP(){
+  document.getElementById('side-panel').style.display='none';
+  document.getElementById('contacts-layout').classList.remove('panel-open');
+  activeId=null;renderList();
+}
+function toggleTrack(id, track, checked){
+  const s=ST[id];
+  let trks=s.tracks||[];
+  if(checked){
+    if(trks.length>=2){
+      // revert the checkbox visually
+      const warn=document.getElementById('track-warn-'+id);
+      if(warn){warn.style.display='block';setTimeout(()=>warn.style.display='none',2500);}
+      // uncheck it
+      event.target.checked=false;
+      return;
+    }
+    if(!trks.includes(track)) trks=[...trks,track];
+  } else {
+    trks=trks.filter(t=>t!==track);
+  }
+  ST[id].tracks=trks;
+  ST[id].marked=trks.length>0;
+  save();renderStats();renderList();
+  // keep panel open on same contact
+  setTimeout(()=>openSP(id),10);
+}
+function setF(id,f,v){
+  ST[id][f]=v;
+  save();renderStats();renderList();
+}
+function loadSPMsg(id,type,btn){
+  const g=GUESTS.find(x=>x.id===id);if(!g)return;
+  const s=ST[id];
+  const t=(s.tracks&&s.tracks[0])||'vip';
+  const tpl=MSG[t]||MSG['vip'];
+  const ta=document.getElementById('sp-mta-'+id);if(ta)ta.value=tpl[type](g);
+  document.querySelectorAll('.msg-btn').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+}
+function copySPMsg(id){
+  const ta=document.getElementById('sp-mta-'+id);if(!ta)return;
+  navigator.clipboard.writeText(ta.value).then(()=>{
+    const el=document.getElementById('sp-cp-'+id);
+    if(el){el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2200);}
+  });
+}
+function closeDetail(){}
+
+function researchAI(name, company){
+  const prompt = 'Haz un research completo y actualizado sobre ' + name + ' de ' + company + ' para Lulo Bank: (1) inversores actuales y rondas de financiamiento, (2) alianzas comerciales recientes, (3) presencia y operaciones en Colombia, (4) productos clave y modelo de negocio, (5) relevancia estratégica para Lulo Bank y posibles sinergias.';
+  if(window.sendPrompt){
+    window.sendPrompt(prompt);
+  } else {
+    navigator.clipboard.writeText(prompt).then(()=>{
+      alert('Pregunta copiada al portapapeles. Pégala en el chat de Claude.');
+    }).catch(()=>prompt_fallback(prompt));
+  }
+}
+function msgAI(name, company, msgId){
+  const ta = document.getElementById(msgId);
+  const current = ta ? ta.value : '';
+  const prompt = 'Mejora y personaliza este mensaje para ' + name + ' de ' + company + ', tono directo entre founders, para agendar una reunión en el LTF2026 en Miami el 23-24 de abril:\n\n' + current;
+  if(window.sendPrompt){
+    window.sendPrompt(prompt);
+  } else {
+    navigator.clipboard.writeText(prompt).then(()=>{
+      alert('Prompt copiado. Pégalo en el chat de Claude.');
+    }).catch(()=>prompt_fallback(prompt));
+  }
+}
+function prompt_fallback(text){
+  const w=window.open('','_blank','width=600,height=400');
+  w.document.write('<pre style="font-family:sans-serif;padding:20px;white-space:pre-wrap">'+text+'</pre>');
+}
+
+function renderDash(){
+  const benji=GUESTS.filter(g=>ST[g.id]&&ST[g.id].benji);
+  const byTrack={};Object.keys(TRACKS).forEach(k=>{if(k)byTrack[k]=[];});
+  const seen=new Set();
+  GUESTS.forEach(g=>{
+    const k=g.first+'|'+g.last;if(seen.has(k))return;seen.add(k);
+    const s=ST[g.id];
+    if(s&&s.tracks&&s.tracks.length){
+      s.tracks.forEach(t=>{if(byTrack[t])byTrack[t].push(g);});
+    }
+  });
+  let html=`<div class="benji-section">
+    <div class="benji-title">Para presentar a Benji (${benji.length})</div>
+    <div class="benji-sub">Contactos que marcaste como prioritarios para presentarle</div>
+    <div class="dash-grid">
+      ${benji.map(g=>{const s=ST[g.id];const trks=s.tracks||[];
+        const bh=trks.map(t=>{const tk=TRACKS[t]||TRACKS[''];return `<span class="badge ${tk.cls}">${tk.label}</span>`;}).join(' ');
+        return `<div class="dash-card" onclick="showPage('contacts',document.querySelector('.nav-tab'));setTimeout(()=>openSP(${g.id}),80)">
+          <div class="dash-card-name">${gn(g)}</div><div class="dash-card-co">${g.company}</div>
+          <div class="dash-card-badges">${bh} <span class="badge ${STATUS_COLORS[s.status]}">${STATUS_LABELS[s.status]}</span></div>
+          ${s.note?`<div class="dash-card-note">${s.note}</div>`:''}</div>`;
+      }).join('')||'<div style="font-size:13px;color:var(--text3);padding:8px 0">Ninguno marcado aún. Abrí un contacto y activá "Presentar a Benji".</div>'}
+    </div>
+  </div>`;
+  Object.entries(byTrack).forEach(([k,gs])=>{
+    if(!gs.length)return;const tk=TRACKS[k];
+    html+=`<div class="dash-section"><div class="dash-title"><span class="badge ${tk.cls}">${tk.label}</span> — ${gs.length} contactos</div>
+    <div class="dash-grid">${gs.map(g=>{const s=ST[g.id];
+      return `<div class="dash-card" onclick="showPage('contacts',document.querySelector('.nav-tab'));setTimeout(()=>openSP(${g.id}),80)">
+        <div class="dash-card-name">${gn(g)}</div><div class="dash-card-co">${g.company}</div>
+        <div class="dash-card-badges"><span class="badge ${STATUS_COLORS[s.status]}">${STATUS_LABELS[s.status]}</span></div>
+        ${s.note?`<div class="dash-card-note">${s.note}</div>`:''}</div>`;
+    }).join('')}</div></div>`;
+  });
+  document.getElementById('dash-content').innerHTML=html;
+}
+document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>
