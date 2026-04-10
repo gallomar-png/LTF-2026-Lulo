@@ -1204,40 +1204,53 @@ function showSyncStatus(msg,color){
 function ensureGuests(){
   GUESTS.forEach(g=>{
     const pre=PRELOADED_STATE[g.id];
-    if(!ST[g.id]){
-      // No local data — use preloaded or defaults
+    if(pre){
+      // This is one of the 48 pre-loaded contacts — PRELOADED_STATE is the source of truth
+      // Only preserve status and note if they were actively changed (non-default)
+      const existing=ST[g.id];
+      ST[g.id]=JSON.parse(JSON.stringify(pre));
+      // Keep user's own edits on top if they differ from defaults
+      if(existing){
+        if(existing.status && existing.status!=='pendiente') ST[g.id].status=existing.status;
+        if(existing.note && existing.note!==pre.note && existing.note!=='') ST[g.id].note=existing.note;
+        if(existing.tracks && existing.tracks.length && JSON.stringify(existing.tracks)!==JSON.stringify(pre.tracks)) ST[g.id].tracks=existing.tracks;
+        if(existing.benji!==undefined && existing.benji!==pre.benji) ST[g.id].benji=existing.benji;
+      }
+    } else if(!ST[g.id]){
+      // Unknown contact with no local data — use defaults
       const a=AUTO[g.first+' '+g.last]||{};
-      ST[g.id]=pre ? JSON.parse(JSON.stringify(pre)) : {marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:''};
-    } else if(pre){
-      // Has local data — restore preloaded fields only if local is empty/default
-      if(!ST[g.id].note && pre.note) ST[g.id].note=pre.note;
-      if((!ST[g.id].tracks||!ST[g.id].tracks.length) && pre.tracks&&pre.tracks.length) ST[g.id].tracks=pre.tracks;
-      if(!ST[g.id].marked && pre.marked) {ST[g.id].marked=pre.marked;}
-      if(ST[g.id].benji===false && pre.benji) ST[g.id].benji=pre.benji;
+      ST[g.id]={marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:''};
     }
-    if(!ST[g.id].tracks){ST[g.id].tracks=ST[g.id].track?[ST[g.id].track]:[];delete ST[g.id].track;}
+    if(!ST[g.id].tracks){ST[g.id].tracks=[];} 
   });
 }
 function getLocalData(){
   try{
-    const s6=localStorage.getItem(SK_LOCAL);if(s6)return JSON.parse(s6);
-    const s5=localStorage.getItem(SK_LOCAL5);
-    if(s5){const old=JSON.parse(s5);const m={};Object.keys(old).forEach(k=>{const r=old[k];m[k]={...r,tracks:r.track?[r.track]:[]};delete m[k].track;});return m;}
-  }catch(e){}return null;
+    // Only load v7 local data (never migrate old versions — they have wrong IDs)
+    const s7=localStorage.getItem(SK_LOCAL);
+    if(s7) return JSON.parse(s7);
+  }catch(e){}
+  return null;
 }
 async function loadState(){
   showSyncStatus('Cargando...','var(--orange)');
   let loaded=false;
-  try{
-    const result=await window.storage.get(CLOUD_KEY,true);
-    if(result&&result.value){ST=JSON.parse(result.value);loaded=true;showSyncStatus('Sincronizado ✓','var(--accent)');}
-  }catch(e){}
+  // Try cloud first
+  if(window.storage){
+    try{
+      const result=await window.storage.get(CLOUD_KEY,true);
+      if(result&&result.value){ST=JSON.parse(result.value);loaded=true;showSyncStatus('Sincronizado ✓','var(--accent)');}
+    }catch(e){}
+  }
+  // Try v7 localStorage only (not old versions)
   if(!loaded){
     const local=getLocalData();
-    if(local){ST=local;showSyncStatus('Subiendo datos locales...','var(--orange)');await save();}
+    if(local){ST=local;showSyncStatus('Local','var(--text3)');}
     else showSyncStatus('Listo','var(--accent)');
   }
-  ensureGuests();renderStats();renderList();
+  // Always apply PRELOADED_STATE on top for any missing/empty fields
+  ensureGuests();
+  renderStats();renderList();
 }
 async function save(){
   try{
