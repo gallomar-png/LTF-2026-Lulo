@@ -95,8 +95,11 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:13px}
 
 /* TABLE */
 .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
-.table-head{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
-.t-row{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;cursor:pointer}
+.table-head{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 40px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.t-row{display:grid;grid-template-columns:36px minmax(0,1.2fr) 170px 100px 100px 40px 75px minmax(0,1.1fr);gap:12px;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .1s;cursor:pointer}
+.star-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:0;line-height:1;opacity:0.25;transition:opacity .15s;color:#f59e0b}
+.star-btn.on{opacity:1}
+.star-btn:hover{opacity:0.7}
 .t-row:last-child{border-bottom:none}
 .t-row:hover{background:var(--surface2)}
 .t-row-active{background:var(--accent-bg)!important;border-left:3px solid var(--accent)}
@@ -263,12 +266,13 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:13px}
         </select>
         <button class="ctrl-btn" id="btn-marked" onclick="toggleMarked()">Solo marcados</button>
         <button class="ctrl-btn" id="btn-benji" onclick="toggleBenji()">Solo Benji</button>
+        <button class="ctrl-btn" id="btn-must" onclick="toggleMustFilter()">⭐ Solo Must</button>
       </div>
       <div class="contacts-layout" id="contacts-layout">
         <div>
           <div class="table-wrap">
             <div class="table-head">
-              <div></div><div>Nombre / Empresa</div><div>Track</div><div>Benji</div><div>Estado</div><div>Acción</div><div>Notas</div>
+              <div></div><div>Nombre / Empresa</div><div>Track</div><div>Benji</div><div>Estado</div><div>⭐</div><div>Acción</div><div>Notas</div>
             </div>
             <div id="list-body"></div>
           </div>
@@ -1179,6 +1183,7 @@ const CO_INFO={
   'Insider':{ind:'MarTech / Customer Engagement',desc:'Plataforma de customer engagement y personalización para e-commerce y retail global.',prod:'Personalización web, push notifications, email automation, AI'},
   'Meituan':{ind:'Super App / Tech / China',desc:'Gigante chino de delivery, turismo y servicios locales. Wenqian Zhu lidera Corp Dev & Investments.',prod:'Food delivery, hotel booking, in-store tech, autonomous delivery'},
   'LuloBank':{ind:'Neobank / Colombia',desc:'Banco digital líder en Colombia. Cuenta de ahorros, tarjeta débito, transferencias.',prod:'Cuenta digital, tarjeta débito, transferencias, rentabilidad'},
+  'Marval O\u0027Farrell Mairal':{ind:'Legal / Argentina',desc:'Una de las firmas de abogados más importantes de Argentina. M&A, fintech y mercados de capital.',prod:'M&A, mercados de capital, fintech legal, corporate'},
   'Jobint.com':{ind:'HR Tech / Recruiting AI',desc:'Plataforma de inteligencia artificial para reclutamiento y matching de talento tech en Latam.',prod:'AI recruiting, job matching, screening automatizado'},
   'Incode Technologies, Inc.':{ind:'AI / Biometría / KYC',desc:'Plataforma de verificación de identidad con AI y biometría. Usada por bancos y fintechs en Latam.',prod:'Verificación de identidad, KYC, biometría facial, prevención de fraude'},
   'TIM':{ind:'Telecomunicaciones / Brasil',desc:'Operadora de telefonía móvil en Brasil. Subsidiaria de TIM S.p.A. (Italia). 5G líder.',prod:'Telefonía móvil, internet, 5G, servicios digitales'},
@@ -1217,7 +1222,7 @@ function ensureGuests(){
       };
     } else if(!existing){
       const a=AUTO[g.first+' '+g.last]||{};
-      ST[g.id]={marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:''};
+      ST[g.id]={marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:'',must:false};
     } else {
       if(!existing.tracks) existing.tracks=[];
     }
@@ -1263,7 +1268,7 @@ async function save(){
 }
 
 
-let onlyM=false,onlyB=false,activeId=null;
+let onlyM=false,onlyB=false,onlyMust=false,activeId=null;
 
 function doLogin(){
   const u=document.getElementById('li-user').value.trim().toLowerCase();
@@ -1304,6 +1309,7 @@ function renderStats(){
 }
 function toggleMarked(){onlyM=!onlyM;document.getElementById('btn-marked').classList.toggle('on',onlyM);renderList();}
 function toggleBenji(){onlyB=!onlyB;document.getElementById('btn-benji').classList.toggle('on',onlyB);renderList();}
+function toggleMustFilter(){onlyMust=!onlyMust;document.getElementById('btn-must').classList.toggle('on',onlyMust);renderList();}
 
 function renderList(){
   const q=document.getElementById('search').value.toLowerCase();
@@ -1315,7 +1321,7 @@ function renderList(){
     const s=ST[g.id];
     const trks=s.tracks||[];
     return(!q||gn(g).toLowerCase().includes(q)||g.company.toLowerCase().includes(q)||g.title.toLowerCase().includes(q))
-      &&(!ft||trks.includes(ft))&&(!fs||s.status===fs)&&(!onlyM||s.marked)&&(!onlyB||s.benji);
+      &&(!ft||trks.includes(ft))&&(!fs||s.status===fs)&&(!onlyM||s.marked)&&(!onlyB||s.benji)&&(!onlyMust||s.must);
   });
   const body=document.getElementById('list-body');
   if(!gs.length){body.innerHTML='<div class="empty-state">Sin resultados</div>';return;}
@@ -1334,6 +1340,7 @@ function renderList(){
       <div class="t-track" style="display:flex;flex-wrap:wrap;gap:3px;align-items:center">${badgeHtml}</div>
       <div>${s.benji?'<span class="badge b-red">Presentar</span>':'<span style="font-size:10px;color:var(--text3)">—</span>'}</div>
       <div><span class="badge ${STATUS_COLORS[s.status]}">${STATUS_LABELS[s.status]}</span></div>
+      <div><button class="star-btn${s.must?' on':''}" onclick="event.stopPropagation();toggleMust(${g.id},this)" title="Marcar como Must">⭐</button></div>
       <div><button class="act-btn" onclick="event.stopPropagation();openSP(${g.id})">Ver →</button></div>
       <div class="note-cell"><div class="note-cell-text">${s.note||''}</div></div>
     </div>`;
@@ -1489,6 +1496,11 @@ function copySPMsg(id){
     const el=document.getElementById('sp-cp-'+id);
     if(el){el.style.opacity='1';setTimeout(()=>el.style.opacity='0',2200);}
   });
+}
+function toggleMust(id, btn){
+  ST[id].must = !ST[id].must;
+  btn.classList.toggle('on', ST[id].must);
+  save(); renderStats();
 }
 function closeDetail(){}
 
