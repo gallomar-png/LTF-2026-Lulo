@@ -1204,24 +1204,23 @@ function showSyncStatus(msg,color){
 function ensureGuests(){
   GUESTS.forEach(g=>{
     const pre=PRELOADED_STATE[g.id];
+    const existing=ST[g.id];
     if(pre){
-      // This is one of the 48 pre-loaded contacts — PRELOADED_STATE is the source of truth
-      // Only preserve status and note if they were actively changed (non-default)
-      const existing=ST[g.id];
-      ST[g.id]=JSON.parse(JSON.stringify(pre));
-      // Keep user's own edits on top if they differ from defaults
-      if(existing){
-        if(existing.status && existing.status!=='pendiente') ST[g.id].status=existing.status;
-        if(existing.note && existing.note!==pre.note && existing.note!=='') ST[g.id].note=existing.note;
-        if(existing.tracks && existing.tracks.length && JSON.stringify(existing.tracks)!==JSON.stringify(pre.tracks)) ST[g.id].tracks=existing.tracks;
-        if(existing.benji!==undefined && existing.benji!==pre.benji) ST[g.id].benji=existing.benji;
-      }
-    } else if(!ST[g.id]){
-      // Unknown contact with no local data — use defaults
+      // Pre-loaded contact: always use PRELOADED_STATE as base
+      ST[g.id]={
+        marked: pre.marked,
+        tracks: pre.tracks.slice(),
+        benji: pre.benji,
+        note: pre.note,
+        // Only preserve status if user actively changed it
+        status: (existing && existing.status && existing.status!=='pendiente') ? existing.status : pre.status
+      };
+    } else if(!existing){
       const a=AUTO[g.first+' '+g.last]||{};
       ST[g.id]={marked:!!a.track,tracks:a.track?[a.track]:[],benji:a.benji||false,status:'pendiente',note:''};
+    } else {
+      if(!existing.tracks) existing.tracks=[];
     }
-    if(!ST[g.id].tracks){ST[g.id].tracks=[];} 
   });
 }
 function getLocalData(){
